@@ -347,32 +347,48 @@ class _home_page extends State<home_page> {
     }
 
     Future deletePost(DocumentSnapshot postData) async {
-      await _db.collection("age_clicks").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("age_clicks")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
         });
       });
 
-      await _db.collection("clicks").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("clicks")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
         });
       });
 
-      await _db.collection("headerComment").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("headerComment")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
         });
       });
 
-      await _db.collection("subComment").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("subComment")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
@@ -380,15 +396,19 @@ class _home_page extends State<home_page> {
       });
 
       await _db.runTransaction((Transaction myTran) async {
-        DocumentReference ref = _db.collection("post").document(postData.documentID);
+        DocumentReference ref =
+            _db.collection("post").document(postData.documentID);
         await myTran.delete(ref);
       });
-
     }
 
     Future deleteTest() async {
-      await _db.collection("dummy").where("key",isEqualTo: "123").getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("dummy")
+          .where("key", isEqualTo: "123")
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           DocumentReference ref = data.reference;
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(ref);
@@ -412,7 +432,7 @@ class _home_page extends State<home_page> {
                 ),
                 FlatButton(
                   onPressed: () {
-                    deletePost(postData).then((e){
+                    deletePost(postData).then((e) {
                       getCarData();
                     });
                     print("Deleted");
@@ -1523,7 +1543,10 @@ class _home_page extends State<home_page> {
                                   Expanded(
                                     flex: 2,
                                     child: Container(
-                                      child: Text(displayName == null ? "Loading ..." : displayName,
+                                      child: Text(
+                                        displayName == null
+                                            ? "Loading ..."
+                                            : displayName,
                                         style: nameText,
                                       ),
                                     ),
@@ -1575,71 +1598,145 @@ class _home_page extends State<home_page> {
     );
 
     Widget listCar = Container(
-        child: PageView(
-      controller: _listController,
-      physics: NeverScrollableScrollPhysics(),
-      scrollDirection: Axis.vertical,
-      children: <Widget>[
-        Container(
+      child: PageView(
+        controller: _listController,
+        physics: NeverScrollableScrollPhysics(),
+        scrollDirection: Axis.vertical,
+        children: <Widget>[
+          Container(
 //            padding: EdgeInsets.only(bottom: 20),
-          height: _height,
-          child: Stack(
-            alignment: Alignment.bottomCenter,
-            children: <Widget>[
-              Container(
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            height: 50,
-                            color: Color(0xffff4141),
-                            child: Column(
-                              children: <Widget>[
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.only(top: 5, bottom: 5),
-                                    child:
-                                        Image.asset("assets/icons/logo2.png"),
-                                  ),
-                                )
-                              ],
+            height: _height,
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: <Widget>[
+                Container(
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: Container(
+                              height: 50,
+                              color: Color(0xffff4141),
+                              child: Column(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Container(
+                                      padding:
+                                          EdgeInsets.only(top: 5, bottom: 5),
+                                      child:
+                                          Image.asset("assets/icons/logo2.png"),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                        )
-                      ],
-                    ),
-                    Expanded(
-                      child: Container(
-                        child: ListView(
-                          children: List.generate(
-                            postData == null ? 0 : postData.length + 1,
-                            (index) {
-                              return GestureDetector(
-                                onLongPress: () {
-                                  deleteAlert(postData[index]);
-                                },
-                                child: index < postData.length
-                                    ? Container(
-                                        padding: EdgeInsets.only(
-                                            left: 15, right: 15, top: 15),
-                                        margin: EdgeInsets.only(bottom: 1.5),
-                                        height: _width * 0.75 + 75,
-                                        color: Colors.white,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              boxShadow: [
-                                                BoxShadow(
-                                                    color: Colors.black,
-                                                    blurRadius: 1)
-                                              ]),
-                                          width: _width,
-                                          child: Column(
-                                            children: <Widget>[
-                                              Expanded(
-                                                child: InkWell(
+                          )
+                        ],
+                      ),
+                      Expanded(
+                        child: Container(
+                          child: ListView(
+                            children: List.generate(
+                              postData == null ? 0 : postData.length + 1,
+                              (index) {
+                                return GestureDetector(
+                                  onLongPress: () {
+                                    deleteAlert(postData[index]);
+                                  },
+                                  child: index < postData.length
+                                      ? Container(
+                                          padding: EdgeInsets.only(
+                                              left: 15, right: 15, top: 15),
+                                          margin: EdgeInsets.only(bottom: 1.5),
+                                          height: _width * 0.75 + 75,
+                                          color: Colors.white,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                      color: Colors.black,
+                                                      blurRadius: 1)
+                                                ]),
+                                            width: _width,
+                                            child: Column(
+                                              children: <Widget>[
+                                                Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      Navigator.push(context,
+                                                          MaterialPageRoute(
+                                                              builder:
+                                                                  (context) {
+                                                        return post_detail(
+                                                            postData[index]);
+                                                      }));
+                                                    },
+                                                    child: Container(
+                                                        child: Stack(
+                                                      alignment: Alignment
+                                                          .bottomCenter,
+                                                      children: <Widget>[
+                                                        PageView(
+                                                            children: List.generate(
+                                                                postData == null
+                                                                    ? 0
+                                                                    : postData[index]
+                                                                            .data[
+                                                                        "size"],
+                                                                (i) {
+                                                          return Container(
+                                                            child: _images ==
+                                                                    null
+                                                                ? Image.asset(
+                                                                    "assets/icons/loading.gif",
+                                                                    fit: BoxFit
+                                                                        .cover,
+                                                                  )
+                                                                : _images[index]
+                                                                            [
+                                                                            i] ==
+                                                                        null
+                                                                    ? Text(
+                                                                        "No images found.",
+                                                                        style:
+                                                                            detailText,
+                                                                        textAlign:
+                                                                            TextAlign.center,
+                                                                      )
+                                                                    : Image
+                                                                        .network(
+                                                                        _images[index]
+                                                                            [i],
+                                                                        fit: BoxFit
+                                                                            .cover,
+                                                                      ),
+                                                          );
+                                                        })),
+                                                        Container(
+                                                          height: 35,
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 10),
+                                                          alignment: Alignment
+                                                              .centerLeft,
+                                                          color: Colors.black26,
+                                                          child: Text(
+                                                            postData == null
+                                                                ? "Loading ..."
+                                                                : toMoney(postData[index]
+                                                                            .data[
+                                                                        "price"]) +
+                                                                    " บาท",
+                                                            style: whiteText,
+                                                          ),
+                                                        )
+                                                      ],
+                                                    )),
+                                                  ),
+                                                ),
+                                                GestureDetector(
                                                   onTap: () {
                                                     Navigator.push(context,
                                                         MaterialPageRoute(
@@ -1649,302 +1746,228 @@ class _home_page extends State<home_page> {
                                                     }));
                                                   },
                                                   child: Container(
-                                                      child: Stack(
-                                                    alignment:
-                                                        Alignment.bottomCenter,
-                                                    children: <Widget>[
-                                                      PageView(
-                                                          children: List.generate(
-                                                              postData == null
-                                                                  ? 0
-                                                                  : postData[index]
-                                                                          .data[
-                                                                      "size"],
-                                                              (i) {
-                                                        return Container(
-                                                          child: _images == null
-                                                              ? Image.asset(
-                                                                  "assets/icons/loading.gif",
-                                                                  fit: BoxFit
-                                                                      .cover,
-                                                                )
-                                                              : _images[index]
-                                                                          [i] ==
-                                                                      null
-                                                                  ? Text(
-                                                                      "No images found.",
-                                                                      style:
-                                                                          detailText,
-                                                                      textAlign:
-                                                                          TextAlign
-                                                                              .center,
-                                                                    )
-                                                                  : Image
-                                                                      .network(
-                                                                      _images[index]
-                                                                          [i],
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    ),
-                                                        );
-                                                      })),
-                                                      Container(
-                                                        height: 35,
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                left: 10),
-                                                        alignment: Alignment
-                                                            .centerLeft,
-                                                        color: Colors.black26,
-                                                        child: Text(
-                                                          postData == null
-                                                              ? "Loading ..."
-                                                              : toMoney(postData[
-                                                                              index]
-                                                                          .data[
-                                                                      "price"]) +
-                                                                  " บาท",
-                                                          style: whiteText,
-                                                        ),
-                                                      )
-                                                    ],
-                                                  )),
-                                                ),
-                                              ),
-                                              GestureDetector(
-                                                onTap: () {
-                                                  Navigator.push(context,
-                                                      MaterialPageRoute(
-                                                          builder: (context) {
-                                                    return post_detail(
-                                                        postData[index]);
-                                                  }));
-                                                },
-                                                child: Container(
-                                                  height: 50,
-                                                  padding: EdgeInsets.only(
-                                                      top: 3, bottom: 3),
-                                                  color: Colors.white,
-                                                  child: Row(
-                                                    children: <Widget>[
-                                                      Expanded(
-                                                        flex: 10,
-                                                        child: Column(
-                                                          children: <Widget>[
-                                                            Expanded(
-                                                              child: Container(
-                                                                padding: EdgeInsets
-                                                                    .only(
-                                                                        left:
-                                                                            10),
-                                                                alignment: Alignment
-                                                                    .centerLeft,
-                                                                child: Text(
-                                                                  postData ==
-                                                                          null
-                                                                      ? "Loading ..."
-                                                                      : postData[index].data["year"] +
-                                                                          " " +
-                                                                          postData[index].data[
-                                                                              "band"] +
-                                                                          " " +
-                                                                          postData[index].data[
-                                                                              "gene"] +
-                                                                          " " +
-                                                                          postData[index]
-                                                                              .data["geneDetail"],
-                                                                  style:
-                                                                      nameText,
-                                                                ),
-                                                              ),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        flex: 5,
-                                                        child: Container(
-                                                          padding:
-                                                              EdgeInsets.only(
-                                                                  right: 10),
+                                                    height: 50,
+                                                    padding: EdgeInsets.only(
+                                                        top: 3, bottom: 3),
+                                                    color: Colors.white,
+                                                    child: Row(
+                                                      children: <Widget>[
+                                                        Expanded(
+                                                          flex: 10,
                                                           child: Column(
                                                             children: <Widget>[
                                                               Expanded(
                                                                 child:
                                                                     Container(
-                                                                  child: Row(
-                                                                    children: <
-                                                                        Widget>[
-                                                                      Expanded(
-                                                                        flex: 1,
-                                                                        child:
-                                                                            Container(
-                                                                          padding:
-                                                                              EdgeInsets.all(2),
-                                                                          child:
-                                                                              Image.asset(
-                                                                            "assets/icons/speed.png",
-                                                                            color:
-                                                                                Colors.grey,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        width:
-                                                                            7,
-                                                                      ),
-                                                                      Expanded(
-                                                                        flex: 4,
-                                                                        child:
-                                                                            Container(
-                                                                          child:
-                                                                              Text(
-                                                                            postData == null
-                                                                                ? "Loading ..."
-                                                                                : postData[index].data["mileage"] + " " + "KM",
-                                                                            style:
-                                                                                subText,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
+                                                                  padding: EdgeInsets
+                                                                      .only(
+                                                                          left:
+                                                                              10),
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .centerLeft,
+                                                                  child: Text(
+                                                                    postData ==
+                                                                            null
+                                                                        ? "Loading ..."
+                                                                        : postData[index].data["year"] +
+                                                                            " " +
+                                                                            postData[index].data["band"] +
+                                                                            " " +
+                                                                            postData[index].data["gene"] +
+                                                                            " " +
+                                                                            postData[index].data["geneDetail"],
+                                                                    style:
+                                                                        nameText,
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              Expanded(
-                                                                child:
-                                                                    Container(
-                                                                  child: Row(
-                                                                    children: <
-                                                                        Widget>[
-                                                                      Expanded(
-                                                                        child:
-                                                                            Container(
-                                                                          padding:
-                                                                              EdgeInsets.all(1.6),
-                                                                          child:
-                                                                              Image.asset(
-                                                                            "assets/icons/gear.png",
-                                                                            color:
-                                                                                Colors.grey,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        width:
-                                                                            7,
-                                                                      ),
-                                                                      Expanded(
-                                                                        flex: 4,
-                                                                        child:
-                                                                            Container(
-                                                                          child:
-                                                                              Text(
-                                                                            postData == null
-                                                                                ? "Loading ..."
-                                                                                : postData[index].data["gearType"],
-                                                                            style:
-                                                                                subText,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ),
+                                                              )
                                                             ],
                                                           ),
                                                         ),
+                                                        Expanded(
+                                                          flex: 5,
+                                                          child: Container(
+                                                            padding:
+                                                                EdgeInsets.only(
+                                                                    right: 10),
+                                                            child: Column(
+                                                              children: <
+                                                                  Widget>[
+                                                                Expanded(
+                                                                  child:
+                                                                      Container(
+                                                                    child: Row(
+                                                                      children: <
+                                                                          Widget>[
+                                                                        Expanded(
+                                                                          flex:
+                                                                              1,
+                                                                          child:
+                                                                              Container(
+                                                                            padding:
+                                                                                EdgeInsets.all(2),
+                                                                            child:
+                                                                                Image.asset(
+                                                                              "assets/icons/speed.png",
+                                                                              color: Colors.grey,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              7,
+                                                                        ),
+                                                                        Expanded(
+                                                                          flex:
+                                                                              4,
+                                                                          child:
+                                                                              Container(
+                                                                            child:
+                                                                                Text(
+                                                                              postData == null ? "Loading ..." : postData[index].data["mileage"] + " " + "KM",
+                                                                              style: subText,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  child:
+                                                                      Container(
+                                                                    child: Row(
+                                                                      children: <
+                                                                          Widget>[
+                                                                        Expanded(
+                                                                          child:
+                                                                              Container(
+                                                                            padding:
+                                                                                EdgeInsets.all(1.6),
+                                                                            child:
+                                                                                Image.asset(
+                                                                              "assets/icons/gear.png",
+                                                                              color: Colors.grey,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width:
+                                                                              7,
+                                                                        ),
+                                                                        Expanded(
+                                                                          flex:
+                                                                              4,
+                                                                          child:
+                                                                              Container(
+                                                                            child:
+                                                                                Text(
+                                                                              postData == null ? "Loading ..." : postData[index].data["gearType"],
+                                                                              style: subText,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 50,
+                                                  decoration: BoxDecoration(
+                                                      border: Border(
+                                                          top: BorderSide(
+                                                              color: Color(
+                                                                  0xffE5E5E5)))),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: <Widget>[
+                                                      Icon(
+                                                        Icons.phone,
+                                                        size: 22,
+                                                        color:
+                                                            Color(0xffff4141),
                                                       ),
+                                                      SizedBox(
+                                                        width: 10,
+                                                      ),
+                                                      Text(
+                                                        "Contact",
+                                                        style: contactText,
+                                                      )
                                                     ],
                                                   ),
                                                 ),
-                                              ),
-                                              Container(
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                    border: Border(
-                                                        top: BorderSide(
-                                                            color: Color(
-                                                                0xffE5E5E5)))),
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  children: <Widget>[
-                                                    Icon(
-                                                      Icons.phone,
-                                                      size: 22,
-                                                      color: Color(0xffff4141),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Text(
-                                                      "Contact",
-                                                      style: contactText,
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      : Container(
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.only(
+                                              left: 15, right: 15, top: 15),
+                                          margin: EdgeInsets.only(bottom: 15),
+                                          height: 70,
+                                          child: Text(
+                                            "To post more than 3 Ad\nContact Us",
+                                            style: subText,
+                                            textAlign: TextAlign.center,
                                           ),
                                         ),
-                                      )
-                                    : Container(
-                                        alignment: Alignment.center,
-                                        padding: EdgeInsets.only(
-                                            left: 15, right: 15, top: 15),
-                                        margin: EdgeInsets.only(bottom: 15),
-                                        height: 70,
-                                        child: Text(
-                                          "To post more than 3 Ad\nContact Us",
-                                          style: subText,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                              );
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          _listController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                        });
-                      },
-                      child: Container(
-                        height: 65,
-                        color: Color(0xffff4141),
-                        alignment: Alignment.center,
-                        child: Text(
-                          "Create Ad",
-                          style: createText,
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            _listController.nextPage(
+                                duration: Duration(milliseconds: 500),
+                                curve: Curves.easeInOut);
+                          });
+                        },
+                        child: Container(
+                          height: 65,
+                          color: Color(0xffff4141),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Create Ad",
+                            style: createText,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        AnimatedContainer(
-          duration: Duration(milliseconds: 300),
-          color: Colors.white,
-          height: _height,
-          curve: Curves.easeIn,
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _scrollController,
-            children: <Widget>[firstPage, secondPage],
+          AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            color: Colors.white,
+            height: _height,
+            curve: Curves.easeIn,
+            child: PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _scrollController,
+              children: <Widget>[firstPage, secondPage],
+            ),
           ),
-        ),
-      ],
-    ));
+        ],
+      ),
+    );
 
     // TODO: implement build
     return Container(

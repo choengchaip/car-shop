@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'MainPage.dart';
 import 'PostDetail.dart';
 import 'SearchPage.dart';
+import 'DealerDetail.dart';
 
 class home_page extends StatefulWidget {
   _home_page createState() => _home_page();
@@ -680,66 +681,71 @@ class _home_page extends State<home_page> {
                           child: ListView(
                             scrollDirection: Axis.horizontal,
                             children: List.generate(
-                                queryDealerData == null
-                                    ? 0
-                                    : queryDealerData.length, (index) {
-                              return Container(
-                                margin: EdgeInsets.only(right: 10),
-                                width: 120,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.all(Radius.circular(4)),
-                                  boxShadow: [BoxShadow(color: Colors.grey ,blurRadius: 2)]
-                                ),
-                                child: Column(
-                                  children: <Widget>[
-                                    Expanded(
-                                      flex: 4,
-                                      child: Container(
-                                        decoration: BoxDecoration(),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            Container(
-                                              height: 65,
-                                              width: 65,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(100)),
-                                                image: DecorationImage(
-                                                    image: queryDealerData ==
-                                                            null ? AssetImage("assets/icons/loading.gif") : dealer_images.length == queryDealerData.length ? dealer_images[index] == null ? AssetImage("assets/icons/logo.png") : NetworkImage(dealer_images[index])
-                                                            : AssetImage(
-                                                                "assets/icons/loading.gif"),
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            )
-                                          ],
+                                queryDealerData == null ? 0: queryDealerData.length, (index) {
+                              return GestureDetector(
+                                onTap:(){
+                                  Navigator.push(context, MaterialPageRoute(builder: (context){
+                                    return dealer_detail(queryDealerData[index]);
+                                  }));
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(right: 10),
+                                  width: 120,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(Radius.circular(4)),
+                                    boxShadow: [BoxShadow(color: Colors.grey ,blurRadius: 2)]
+                                  ),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Expanded(
+                                        flex: 4,
+                                        child: Container(
+                                          decoration: BoxDecoration(),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: <Widget>[
+                                              Container(
+                                                height: 65,
+                                                width: 65,
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.all(
+                                                      Radius.circular(100)),
+                                                  image: DecorationImage(
+                                                      image: queryDealerData ==
+                                                              null ? AssetImage("assets/icons/loading.gif") : dealer_images.length == queryDealerData.length ? dealer_images[index] == null ? AssetImage("assets/icons/logo.png") : NetworkImage(dealer_images[index])
+                                                              : AssetImage(
+                                                                  "assets/icons/loading.gif"),
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Container(
-                                        padding: EdgeInsets.only(bottom: 15),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                              padding: EdgeInsets.only(
-                                                  left: 10, right: 10),
-                                              child: Text(queryDealerData == null ? "Loading ..." : dealer_images.length != queryDealerData.length ? "Loading ..." : queryDealerData[index]["passpord"],
-                                                style: nameText,
-                                                softWrap: false,
+                                      Expanded(
+                                        flex: 3,
+                                        child: Container(
+                                          padding: EdgeInsets.only(bottom: 15),
+                                          child: Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: <Widget>[
+                                              Container(
+                                                padding: EdgeInsets.only(
+                                                    left: 10, right: 10),
+                                                child: Text(queryDealerData == null ? "Loading ..." : dealer_images.length != queryDealerData.length ? "Loading ..." : queryDealerData[index]["passpord"],
+                                                  style: nameText,
+                                                  softWrap: false,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               );
                             }),

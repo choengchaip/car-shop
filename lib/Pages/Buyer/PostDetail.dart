@@ -340,6 +340,12 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
     getUserData();
   }
 
+  @override
+  void dispose(){
+    _loadingAnimate.dispose();
+    super.dispose();
+  }
+
   int section1 = 0;
   int section2 = 0;
   ScrollController _scrollController = ScrollController();

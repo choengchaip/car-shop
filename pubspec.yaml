@@ -32,6 +32,7 @@ dependencies:
   dotted_border: ^1.0.2
   intl: ^0.15.8
   flutter_facebook_login: ^3.0.0
+  google_maps_flutter: ^0.5.21+7
 
 dev_dependencies:
   flutter_test:
