@@ -3,10 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sa_project/Pages/Buyer/PostDetail.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:async';
+import 'package:location/location.dart';
 
 class dealer_detail extends StatefulWidget {
   DocumentSnapshot queryData;
-
+//  var location = new Location();
   dealer_detail(this.queryData);
 
   @override
@@ -25,16 +28,13 @@ class _dealer_detail extends State<dealer_detail> {
   List<DocumentSnapshot> postData;
   var _images;
   String bgImg;
-//  Completer<GoogleMapController> _controller = Completer();
-//  static final CameraPosition _kGooglePlex = CameraPosition(
-//    target: LatLng(37.42796133580664, -122.085749655962),
-//    zoom: 14.4746,
-//  );
-//
-//  static final CameraPosition _kLake = CameraPosition(
-//      bearing: 192.8334901395799,
-//      target: LatLng(37.43296265331129, -122.08832357078792),
-//      tilt: 59.440717697143555);
+  int clicks = 0;
+  Completer<GoogleMapController> _controller = Completer();
+
+  static final CameraPosition _kGooglePlex = CameraPosition(
+    target: LatLng(37.42796133580664, -122.085749655962),
+    zoom: 16,
+  );
 
   TextStyle topbarText =
       TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
@@ -78,6 +78,19 @@ class _dealer_detail extends State<dealer_detail> {
     });
   }
 
+  Future sendClick()async{
+    int a;
+    await _db.collection('buyer').document(queryData.documentID).get().then((data){
+      a = data.data['clicks'];
+    });
+    setState(() {
+      clicks = a+1;
+    });
+    await _db.collection("buyer").document(queryData.documentID).updateData({
+      'clicks' : a+1
+    });
+  }
+  
   String toMoney(String money) {
     //1200000
     //
@@ -146,6 +159,7 @@ class _dealer_detail extends State<dealer_detail> {
     selector = Selector.listing;
     getCarData();
     getDealerData();
+    sendClick();
   }
 
   @override
@@ -465,17 +479,17 @@ class _dealer_detail extends State<dealer_detail> {
     Widget location = Container(
       child: ListView(
         children: <Widget>[
-//          Container(
-//            height: (_height - 125 - 60 ) / 2,
-//            color: Colors.grey,
-//            child: GoogleMap(
-//              mapType: MapType.normal,
-//              initialCameraPosition: _kGooglePlex,
-//              onMapCreated: (GoogleMapController controller) {
-//                _controller.complete(controller);
-//              },
-//            ),
-//          ),
+          Container(
+            height: (_height - 125 - 60 ) / 2,
+            color: Colors.grey,
+            child: GoogleMap(
+              mapType: MapType.normal,
+              initialCameraPosition: _kGooglePlex,
+              onMapCreated: (GoogleMapController controller) {
+                _controller.complete(controller);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -521,7 +535,7 @@ class _dealer_detail extends State<dealer_detail> {
                   ),
                   Container(
                     child: Text(
-                      'Clicks : ' + queryData['clicks'].toString(),
+                      'Clicks : ' + clicks.toString(),
                       style: nameText,
                     ),
                   ),

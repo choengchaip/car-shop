@@ -67,21 +67,12 @@ class _home_page extends State<home_page> {
     images = List<String>();
     featureData = List<Map<String, dynamic>>();
     queryFeatureData = List<DocumentSnapshot>();
-    await _db
-        .collection("clicks")
-        .orderBy("clicks",descending: true)
-        .limit(5)
-        .getDocuments()
-        .then((docs) {
+    await _db.collection("clicks").orderBy("clicks",descending: true).limit(5).getDocuments().then((docs) {
       featurePost = docs.documents;
     });
     for (int i = 0; i < featurePost.length; i++) {
-      final StorageReference storageReference =
-          await FirebaseStorage.instance.ref().child("post_photo");
-      String tmp = await storageReference
-          .child(featurePost[i].data["post"])
-          .child("0")
-          .getDownloadURL();
+      final StorageReference storageReference = FirebaseStorage.instance.ref().child("post_photo");
+      String tmp = await storageReference.child(featurePost[i].data["post"]).child("0").getDownloadURL();
       setState(() {
         images.add(tmp);
       });
@@ -130,7 +121,7 @@ class _home_page extends State<home_page> {
 
   Future getDealer() async {
     dealer_images = List<String>();
-    await _db.collection("buyer").orderBy("clicks").getDocuments().then((docs) {
+    await _db.collection("buyer").orderBy("clicks",descending: true).getDocuments().then((docs) {
       setState(() {
         queryDealerData = docs.documents;
       });

@@ -4,6 +4,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+import 'DealerDetail.dart';
+
 class post_detail extends StatefulWidget {
   DocumentSnapshot queryData;
 
@@ -1981,42 +1983,47 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                     padding: EdgeInsets.only(left: 10),
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      "Specifications",
+                                      "Seller",
                                       style: detailText,
                                     ),
                                   ),
-                                  Container(
-                                      height: 80,
-                                      alignment: Alignment.centerLeft,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border(
-                                              bottom: BorderSide(
-                                                  color: Color(0xffe5e5e5)))),
-                                      child: ListTile(
-                                        leading: CircleAvatar(backgroundImage: dealer_images == null ? AssetImage(
-                                                  "assets/icons/logo.png")
-                                              : NetworkImage(dealer_images),
-                                          maxRadius: 25,
-                                            backgroundColor: Colors.white,
-                                        ),
-                                        title: Text(
-                                          dealerData == null
-                                              ? "Loading ..."
-                                              : dealerData.data["passpord"],
-                                          style: detailText,
-                                        ),
-                                        subtitle: Text(
-                                          dealerData == null
-                                              ? "Loading ..."
-                                              : dealerData.data["phone"],
-                                          style: subText,
-                                        ),
-                                        trailing: Icon(
-                                          Icons.arrow_forward_ios,
-                                          size: 18,
-                                        ),
-                                      )),
+                                  GestureDetector(
+                                  onTap:(){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context)=>dealer_detail(dealerData)));
+                                  },
+                                    child: Container(
+                                        height: 80,
+                                        alignment: Alignment.centerLeft,
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border(
+                                                bottom: BorderSide(
+                                                    color: Color(0xffe5e5e5)))),
+                                        child: ListTile(
+                                          leading: CircleAvatar(backgroundImage: dealer_images == null ? AssetImage(
+                                                    "assets/icons/logo.png")
+                                                : NetworkImage(dealer_images),
+                                            maxRadius: 25,
+                                              backgroundColor: Colors.white,
+                                          ),
+                                          title: Text(
+                                            dealerData == null
+                                                ? "Loading ..."
+                                                : dealerData.data["passpord"],
+                                            style: detailText,
+                                          ),
+                                          subtitle: Text(
+                                            dealerData == null
+                                                ? "Loading ..."
+                                                : dealerData.data["phone"],
+                                            style: subText,
+                                          ),
+                                          trailing: Icon(
+                                            Icons.arrow_forward_ios,
+                                            size: 18,
+                                          ),
+                                        )),
+                                  ),
                                   Container(
                                     height: 55,
                                     padding: EdgeInsets.only(left: 10),
