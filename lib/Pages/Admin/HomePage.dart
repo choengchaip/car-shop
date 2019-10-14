@@ -6,6 +6,7 @@ import 'package:sa_project/Pages/Buyer/MainPage.dart';
 import 'BestPosts.dart';
 import 'CarAnalysis.dart';
 import 'DealerPage.dart';
+import 'dart:convert';
 
 class admin_page extends StatefulWidget {
   @override
@@ -31,6 +32,9 @@ class _admin_page extends State<admin_page> {
   String bestDealerImage;
   DocumentSnapshot bestPost;
   String bestPostImage;
+
+  TextEditingController _min = TextEditingController();
+  TextEditingController _max = TextEditingController();
 
   Future getBestDealer() async {
     DocumentSnapshot dealer;
@@ -76,6 +80,76 @@ class _admin_page extends State<admin_page> {
     setState(() {
       bestPostImage = url;
       bestPost = post;
+    });
+  }
+
+  confirmDialog(){
+    showDialog(context: context,builder: (context){
+      return AlertDialog(
+        title: Text("Enter Age"),
+        content: Container(
+          width: 100,
+          height: 100,
+          child: Column(
+            children: <Widget>[
+              Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      width: 90,
+                      child: Text('Min Age',style: cancelText,),
+                    ),
+                    Container(
+                      child: Text(''),
+                    ),
+                    Container(
+                      width: 90,
+                      child: Text('Max Age',style: cancelText,),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Container(
+                      width: 90,
+                      child: TextField(
+                        controller: _min,
+                      ),
+                    ),
+                    Container(
+                      child: Text('-'),
+                    ),
+                    Container(
+                      width: 90,
+                      child: TextField(
+                        controller: _max,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(),
+            ],
+          )
+        ),
+        actions: <Widget>[
+          FlatButton(onPressed: (){Navigator.of(context).pop();}, child: Text("Cancel")),
+          FlatButton(onPressed: (){Navigator.push(context, MaterialPageRoute(
+            builder: (context){
+              if(_min.text.isNotEmpty && _max.text.isNotEmpty){
+                return car_anal(min: int.parse(_min.text),max: int.parse(_max.text),);
+              }else{
+                return car_anal();
+              }
+            }
+          ));}, child: Text("Confirm"))
+        ],
+      );
+
     });
   }
 
@@ -389,9 +463,10 @@ class _admin_page extends State<admin_page> {
             ),
             GestureDetector(
               onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context){
-                  return car_anal();
-                }));
+//                Navigator.push(context, MaterialPageRoute(builder: (context){
+//                  return car_anal();
+//                }));
+                confirmDialog();
               },
               child: Container(
                 height: 70,

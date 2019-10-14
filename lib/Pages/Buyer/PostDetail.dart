@@ -14,9 +14,10 @@ class post_detail extends StatefulWidget {
   _post_detail createState() => _post_detail(this.queryData);
 }
 
-class _post_detail extends State<post_detail> with TickerProviderStateMixin{
+class _post_detail extends State<post_detail> with TickerProviderStateMixin {
   DocumentSnapshot queryData;
   bool isAdmin = false;
+
   _post_detail(this.queryData);
 
   final Firestore _db = Firestore.instance;
@@ -72,7 +73,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
 
   Future getData() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if(user.uid == "zfSe7CpfZccnv1WOfvdeXuWq6Sh2"){
+    if (user.uid == "zfSe7CpfZccnv1WOfvdeXuWq6Sh2") {
       setState(() {
         isAdmin = true;
       });
@@ -83,7 +84,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
         .child("passport_photo")
         .child(queryData.data["uid"]);
     String data;
-    data = await storageReference.getDownloadURL().catchError((e){
+    data = await storageReference.getDownloadURL().catchError((e) {
       return null;
     });
     final DocumentSnapshot documentSnapshot =
@@ -136,6 +137,27 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
     setState(() {
       myuser = json;
     });
+  }
+
+  Future saveToFav()async{
+    final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    bool isHas = false;
+    
+    await _db.collection('favor').where('uid', isEqualTo: user.uid).where('post', isEqualTo: queryData.documentID).getDocuments().then((docs){
+      docs.documents.forEach((data){
+        isHas = true;
+      });
+    });
+    
+    if(isHas){
+      alertDialog('Already Added.');
+    }else{
+      await _db.collection('favor').add({
+        'uid': user.uid,
+        'post': queryData.documentID
+      });
+      alertDialog('Added to Your Favor Cars.');
+    }
   }
 
   Future<String> getProfileImage(String uid) async {
@@ -312,6 +334,25 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
     });
   }
 
+  alertDialog(String head){
+    showDialog(
+        context: context,
+        builder: (context){
+          return AlertDialog(
+            title: Text(head),
+            actions: <Widget>[
+              FlatButton(
+                  child: Text('Ok'),
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  }
+              ),
+            ],
+          );
+        }
+    );
+  }
+
   void test() {
     _db.collection("subComment").getDocuments().then((docs) {
       _db
@@ -324,6 +365,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
   bool contactExpand = false;
   bool keyBoardExpand = false;
   AnimationController _loadingAnimate;
+
   @override
   void initState() {
     _loadingAnimate =
@@ -343,7 +385,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
   }
 
   @override
-  void dispose(){
+  void dispose() {
     _loadingAnimate.dispose();
     super.dispose();
   }
@@ -363,7 +405,8 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
     print(_currentPosition);
     print(_space);
     setState(() {
-      _scrollController.animateTo((_currentPosition + (_space)), duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+      _scrollController.animateTo((_currentPosition + (_space)),
+          duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
     });
   }
 
@@ -372,32 +415,48 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
     double _width = MediaQuery.of(context).size.width;
 
     Future deletePost(DocumentSnapshot postData) async {
-      await _db.collection("age_clicks").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("age_clicks")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
         });
       });
 
-      await _db.collection("clicks").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("clicks")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
         });
       });
 
-      await _db.collection("headerComment").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("headerComment")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
         });
       });
 
-      await _db.collection("subComment").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
-        docs.documents.forEach((data){
+      await _db
+          .collection("subComment")
+          .where("post", isEqualTo: postData.documentID)
+          .getDocuments()
+          .then((docs) {
+        docs.documents.forEach((data) {
           _db.runTransaction((Transaction myTran) async {
             await myTran.delete(data.reference);
           });
@@ -405,45 +464,47 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
       });
 
       await _db.runTransaction((Transaction myTran) async {
-        DocumentReference ref = _db.collection("post").document(postData.documentID);
+        DocumentReference ref =
+            _db.collection("post").document(postData.documentID);
         await myTran.delete(ref);
       });
-
     }
 
     deleteAlert(DocumentSnapshot postData) {
       showDialog(
           context: context,
           builder: (context) {
-            return isAdmin ? AlertDialog(
-              title: Text("Confirm delete ?"),
-              actions: <Widget>[
-                FlatButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text("Cancel"),
-                ),
-                FlatButton(
-                  onPressed: () {
-                    deletePost(postData).then((e)async{
-                      Navigator.of(context).pop();
-                    });
-                  },
-                  child: Text("Confirm"),
-                ),
-              ],
-            ):AlertDialog(
-              title: Text("You are not admin"),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text("Cancel"),
-                  onPressed: (){
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
+            return isAdmin
+                ? AlertDialog(
+                    title: Text("Confirm delete ?"),
+                    actions: <Widget>[
+                      FlatButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text("Cancel"),
+                      ),
+                      FlatButton(
+                        onPressed: () {
+                          deletePost(postData).then((e) async {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                        child: Text("Confirm"),
+                      ),
+                    ],
+                  )
+                : AlertDialog(
+                    title: Text("You are not admin"),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text("Cancel"),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
           });
     }
 
@@ -494,7 +555,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                               height: MediaQuery.of(context).padding.top,
                               color: Color(0xffff4141)),
                           Container(
-                            padding: EdgeInsets.only(left: 10,right: 10),
+                            padding: EdgeInsets.only(left: 10, right: 10),
                             color: Color(0xffff4141),
                             child: Stack(
                               children: <Widget>[
@@ -625,20 +686,31 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                 style: priceText),
                                           ),
                                         ),
-                                        Expanded(
-                                          flex: 1,
+                                        GestureDetector(
+                                          onTap: (){
+                                            saveToFav();
+                                          },
                                           child: Container(
-                                            decoration: BoxDecoration(
-                                                border: Border(
-                                                    left: BorderSide(
-                                                        color: Color(
-                                                            0xffe5e5e5)))),
-                                            child: Image.asset(
-                                              "assets/icons/calculator.png",
-                                              height: 19,
-                                            ),
+                                            child: Row(children: <Widget>[
+                                              Container(
+                                                width: 60,
+                                                child: Icon(Icons.favorite,color: Color(0xffff4141),size: 25),
+                                              ),
+                                              Container(
+                                                width: 60,
+                                                decoration: BoxDecoration(
+                                                    border: Border(
+                                                        left: BorderSide(
+                                                            color: Color(
+                                                                0xffe5e5e5)))),
+                                                child: Image.asset(
+                                                  "assets/icons/calculator.png",
+                                                  height: 19,
+                                                ),
+                                              ),
+                                            ]),
                                           ),
-                                        )
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -1988,9 +2060,13 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                     ),
                                   ),
                                   GestureDetector(
-                                  onTap:(){
-                                    Navigator.push(context, MaterialPageRoute(builder: (context)=>dealer_detail(dealerData)));
-                                  },
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  dealer_detail(dealerData)));
+                                    },
                                     child: Container(
                                         height: 80,
                                         alignment: Alignment.centerLeft,
@@ -2000,11 +2076,14 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                 bottom: BorderSide(
                                                     color: Color(0xffe5e5e5)))),
                                         child: ListTile(
-                                          leading: CircleAvatar(backgroundImage: dealer_images == null ? AssetImage(
+                                          leading: CircleAvatar(
+                                            backgroundImage: dealer_images ==
+                                                    null
+                                                ? AssetImage(
                                                     "assets/icons/logo.png")
                                                 : NetworkImage(dealer_images),
                                             maxRadius: 25,
-                                              backgroundColor: Colors.white,
+                                            backgroundColor: Colors.white,
                                           ),
                                           title: Text(
                                             dealerData == null
@@ -2169,8 +2248,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                                 1, (jdex) {
                                                   _inputs.add(
                                                       new TextEditingController());
-                                                  _taps.add(
-                                                      new FocusNode());
+                                                  _taps.add(new FocusNode());
                                                   return jdex !=
                                                           (subComment[index]
                                                               .length)
@@ -2303,36 +2381,38 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                                     Expanded(
                                                                       child:
                                                                           GestureDetector(
-                                                                            onTapDown: (details){
-                                                                              setState(() {
-                                                                                keyBoardExpand = true;
-                                                                              });
-                                                                              _taps[index].requestFocus();
-                                                                              toPosition(details);
-                                                                            },
-                                                                            child: Container(
-                                                                        padding:
-                                                                              EdgeInsets.all(8),
-                                                                        decoration: BoxDecoration(
-                                                                              color:
-                                                                                  Color(0xffe5e5e5),
-                                                                              borderRadius: BorderRadius.all(Radius.circular(6))),
+                                                                        onTapDown:
+                                                                            (details) {
+                                                                          setState(
+                                                                              () {
+                                                                            keyBoardExpand =
+                                                                                true;
+                                                                          });
+                                                                          _taps[index]
+                                                                              .requestFocus();
+                                                                          toPosition(
+                                                                              details);
+                                                                        },
                                                                         child:
+                                                                            Container(
+                                                                          padding:
+                                                                              EdgeInsets.all(8),
+                                                                          decoration: BoxDecoration(
+                                                                              color: Color(0xffe5e5e5),
+                                                                              borderRadius: BorderRadius.all(Radius.circular(6))),
+                                                                          child:
                                                                               IgnorePointer(
-                                                                                child: TextField(
+                                                                            child:
+                                                                                TextField(
                                                                               focusNode: _taps[index],
-                                                                                controller:
-                                                                                  _inputs[index],
-                                                                            style:
-                                                                                  subText,
-                                                                            maxLines:
-                                                                                  null,
-                                                                            decoration:
-                                                                                  InputDecoration.collapsed(hintText: "Send your question"),
-                                                                              ),
-                                                                              ),
+                                                                              controller: _inputs[index],
+                                                                              style: subText,
+                                                                              maxLines: null,
+                                                                              decoration: InputDecoration.collapsed(hintText: "Send your question"),
                                                                             ),
                                                                           ),
+                                                                        ),
+                                                                      ),
                                                                     ),
                                                                   ],
                                                                 ),
@@ -2355,7 +2435,8 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                                           return;
                                                                         }
                                                                         loadingPopup();
-                                                                        FocusScope.of(context).unfocus();
+                                                                        FocusScope.of(context)
+                                                                            .unfocus();
                                                                         await toComment(headerComment[index].documentID, myuser["uid"], _inputs[index].text).then(
                                                                             (err) async {
                                                                           await getBlogDetail();
@@ -2430,16 +2511,20 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                             child: Column(
                                               children: <Widget>[
                                                 GestureDetector(
-                                                  onTapDown: (details){print("sus");},
+                                                  onTapDown: (details) {
+                                                    print("sus");
+                                                  },
                                                   child: Container(
                                                     alignment:
                                                         Alignment.centerLeft,
                                                     child: Text(
                                                       myuser == null
                                                           ? "Something"
-                                                          : myuser["firstname"] +
+                                                          : myuser[
+                                                                  "firstname"] +
                                                               " " +
-                                                              myuser["lastname"],
+                                                              myuser[
+                                                                  "lastname"],
                                                       style: detailText,
                                                     ),
                                                   ),
@@ -2448,7 +2533,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                   height: 15,
                                                 ),
                                                 GestureDetector(
-                                                  onTapDown: (details){
+                                                  onTapDown: (details) {
                                                     setState(() {
                                                       keyBoardExpand = true;
                                                     });
@@ -2457,24 +2542,22 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                   },
                                                   child: Container(
                                                     decoration: BoxDecoration(
-                                                        color: Color(0xffe5e5e5),
+                                                      color: Color(0xffe5e5e5),
                                                     ),
                                                     child: IgnorePointer(
                                                       child: TextField(
                                                         focusNode: headerFocus,
-                                                        controller:
-                                                        headerText,
-                                                        style:
-                                                        subText,
-                                                        maxLines:
-                                                        null,
-                                                        decoration:
-                                                        InputDecoration.collapsed(hintText: "Send your question"),
+                                                        controller: headerText,
+                                                        style: subText,
+                                                        maxLines: null,
+                                                        decoration: InputDecoration
+                                                            .collapsed(
+                                                                hintText:
+                                                                    "Send your question"),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-
                                               ],
                                             ),
                                           ),
@@ -2666,8 +2749,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                         child: Container(
                                           child: Column(children: <Widget>[
                                             InkWell(
-                                              onTap: () async {
-                                              },
+                                              onTap: () async {},
                                               child: Container(
                                                   alignment: Alignment.center,
                                                   height: 40,

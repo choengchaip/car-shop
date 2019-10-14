@@ -14,7 +14,7 @@ class car_anal extends StatefulWidget {
 
 class _car_anal extends State<car_anal> with TickerProviderStateMixin {
   int min, max;
-
+  bool notNull = false;
   _car_anal({@required this.min, @required this.max});
 
   TextStyle topbarText =
@@ -57,9 +57,21 @@ class _car_anal extends State<car_anal> with TickerProviderStateMixin {
       loadingProgress.setProgress(0);
       loadingProgress.setProgressText('Getting Car Data');
     });
-    await _db.collection('age_clicks').getDocuments().then((docs) {
-      ageList = docs.documents;
-    });
+    if(this.min != null && this.max != null){
+      setState(() {
+        notNull = true;
+      });
+      await _db.collection('age_clicks').where('age',isGreaterThanOrEqualTo: this.min).where('age',isLessThanOrEqualTo: this.max).getDocuments().then((docs) {
+        ageList = docs.documents;
+      });
+    }else{
+      setState(() {
+        notNull = false;
+      });
+      await _db.collection('age_clicks').getDocuments().then((docs) {
+        ageList = docs.documents;
+      });
+    }
     setState((){
       loadingProgress.setProgress(50);
       loadingProgress.setProgressText('Analyzing Post Data');
@@ -220,6 +232,16 @@ class _car_anal extends State<car_anal> with TickerProviderStateMixin {
       body: Container(
         child: ListView(
           children: <Widget>[
+            notNull ? Container(
+              height: 50,
+              alignment: Alignment.center,
+              color: Colors.white,
+              child: Text(
+                'Age min : ${this.min} / Age max : ${this.max}',
+                style: detailText,
+                textAlign: TextAlign.center,
+              ),
+            ):Container(),
             Container(
               height: 70,
               alignment: Alignment.center,

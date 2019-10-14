@@ -9,6 +9,7 @@ import 'package:location/location.dart';
 
 class dealer_detail extends StatefulWidget {
   DocumentSnapshot queryData;
+
 //  var location = new Location();
   dealer_detail(this.queryData);
 
@@ -32,7 +33,7 @@ class _dealer_detail extends State<dealer_detail> {
   Completer<GoogleMapController> _controller = Completer();
 
   static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
+    target: LatLng(13.7650836, 100.5379664),
     zoom: 16,
   );
 
@@ -78,19 +79,24 @@ class _dealer_detail extends State<dealer_detail> {
     });
   }
 
-  Future sendClick()async{
+  Future sendClick() async {
     int a;
-    await _db.collection('buyer').document(queryData.documentID).get().then((data){
+    await _db
+        .collection('buyer')
+        .document(queryData.documentID)
+        .get()
+        .then((data) {
       a = data.data['clicks'];
     });
     setState(() {
-      clicks = a+1;
+      clicks = a + 1;
     });
-    await _db.collection("buyer").document(queryData.documentID).updateData({
-      'clicks' : a+1
-    });
+    await _db
+        .collection("buyer")
+        .document(queryData.documentID)
+        .updateData({'clicks': a + 1});
   }
-  
+
   String toMoney(String money) {
     //1200000
     //
@@ -405,7 +411,10 @@ class _dealer_detail extends State<dealer_detail> {
               children: <Widget>[
                 Container(
                   width: 40,
-                  child: Icon(Icons.error,color: Colors.black54,),
+                  child: Icon(
+                    Icons.error,
+                    color: Colors.black54,
+                  ),
                 ),
                 Expanded(
                   child: Container(
@@ -424,11 +433,15 @@ class _dealer_detail extends State<dealer_detail> {
               children: <Widget>[
                 Container(
                   width: 40,
-                  child: Icon(Icons.account_circle,color: Colors.black54,),
+                  child: Icon(
+                    Icons.account_circle,
+                    color: Colors.black54,
+                  ),
                 ),
                 Expanded(
                   child: Container(
-                    child: Text('${queryData.data['firstName']} ${queryData.data['lastName']}'),
+                    child: Text(
+                        '${queryData.data['firstName']} ${queryData.data['lastName']}'),
                   ),
                 ),
               ],
@@ -443,7 +456,10 @@ class _dealer_detail extends State<dealer_detail> {
               children: <Widget>[
                 Container(
                   width: 40,
-                  child: Icon(Icons.email,color: Colors.black54,),
+                  child: Icon(
+                    Icons.email,
+                    color: Colors.black54,
+                  ),
                 ),
                 Expanded(
                   child: Container(
@@ -462,7 +478,10 @@ class _dealer_detail extends State<dealer_detail> {
               children: <Widget>[
                 Container(
                   width: 40,
-                  child: Icon(Icons.phone,color: Colors.black54,),
+                  child: Icon(
+                    Icons.phone,
+                    color: Colors.black54,
+                  ),
                 ),
                 Expanded(
                   child: Container(
@@ -477,20 +496,20 @@ class _dealer_detail extends State<dealer_detail> {
     );
 
     Widget location = Container(
-      child: ListView(
-        children: <Widget>[
-          Container(
-            height: (_height - 125 - 60 ) / 2,
-            color: Colors.grey,
-            child: GoogleMap(
-              mapType: MapType.normal,
-              initialCameraPosition: _kGooglePlex,
-              onMapCreated: (GoogleMapController controller) {
-                _controller.complete(controller);
-              },
-            ),
-          ),
-        ],
+      height: (_height - 125 - 60) / 2,
+      color: Colors.grey,
+      child: GoogleMap(
+        markers: {
+          Marker(
+              markerId: MarkerId("1"),
+              position: LatLng(13.6900043, 100.7479237),
+              infoWindow: InfoWindow(title: "สนามบินสุวรรณภูมิ", snippet: "สนามบินนานาชาติของประเทศไทย")),
+        },
+        mapType: MapType.normal,
+        initialCameraPosition: _kGooglePlex,
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
       ),
     );
 

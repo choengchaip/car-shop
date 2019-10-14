@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:sa_project/LoadingProgress.dart';
+import 'FavorPage.dart';
 import 'MainPage.dart';
 import 'PostDetail.dart';
 import 'SearchPage.dart';
@@ -477,31 +478,38 @@ class _home_page extends State<home_page> with TickerProviderStateMixin{
                                               ),
                                             ),
                                           ),
-                                          Container(
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: <Widget>[
-                                                SizedBox(
-                                                  height: 1,
-                                                ),
-                                                Container(
-                                                  child: Icon(
-                                                    Icons.favorite,
-                                                    size: 25,
-                                                    color: Color(0xffff4141),
+                                          GestureDetector(
+                                            onTap:(){
+                                              Navigator.push(context, MaterialPageRoute(builder: (context){
+                                                return favor_page();
+                                              }));
+                                            },
+                                            child: Container(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: <Widget>[
+                                                  SizedBox(
+                                                    height: 1,
                                                   ),
-                                                ),
-                                                SizedBox(
-                                                  height: 5,
-                                                ),
-                                                Container(
-                                                    child: Text(
-                                                  "Your Saved\nCars",
-                                                  style: optionText,
-                                                  textAlign: TextAlign.center,
-                                                )),
-                                              ],
+                                                  Container(
+                                                    child: Icon(
+                                                      Icons.favorite,
+                                                      size: 25,
+                                                      color: Color(0xffff4141),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 5,
+                                                  ),
+                                                  Container(
+                                                      child: Text(
+                                                    "Your Saved\nCars",
+                                                    style: optionText,
+                                                    textAlign: TextAlign.center,
+                                                  )),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                           Container(
