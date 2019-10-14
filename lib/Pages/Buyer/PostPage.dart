@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:sa_project/LoadingProgress.dart';
 import 'PostDetail.dart';
 
 class post_page extends StatefulWidget {
@@ -14,14 +14,16 @@ class post_page extends StatefulWidget {
   _post_page createState() => _post_page(this.topText);
 }
 
-class _post_page extends State<post_page> {
+class _post_page extends State<post_page> with TickerProviderStateMixin{
   Query _query;
   _post_page(this._query);
   final Firestore _db = Firestore.instance;
   List<DocumentSnapshot> postData;
   var _images;
   bool isAdmin = false;
-
+  bool isFinish = false;
+  AnimationController _loadingAnimate;
+  LoadingProgress loadingProgress;
   TextStyle detailText = TextStyle(
       color: Color(0xff434343), fontSize: 16, fontWeight: FontWeight.bold);
 
@@ -42,13 +44,14 @@ class _post_page extends State<post_page> {
 
   Future getPostData()async{
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if(user.uid == "FSRx7HLAPIcn9qxPfqe720cbBo73"){
+    if(user.uid == "zfSe7CpfZccnv1WOfvdeXuWq6Sh2"){
       setState(() {
         isAdmin = true;
       });
     }
     _query.getDocuments().then((docs){
       setState(() {
+        postData = null;
         postData = docs.documents;
         getCarImages();
       });
@@ -78,7 +81,18 @@ class _post_page extends State<post_page> {
     List<List<String>> img = [];
     final StorageReference storageRef =
     FirebaseStorage.instance.ref().child("post_photo");
-
+    setState(() {
+      loadingProgress.setProgress(0);
+      loadingProgress.setProgressText('Starting Load Post Images');
+    });
+    int a = 0;
+    for (int i = 0; i < postData.length; i++) {
+      List<String> tmp = [];
+      for (int j = 0; j < postData[i].data["size"]; j++) {
+        a++;
+      }
+    }
+    int b = 1;
     for (int i = 0; i < postData.length; i++) {
       List<String> tmp = [];
       for (int j = 0; j < postData[i].data["size"]; j++) {
@@ -90,19 +104,36 @@ class _post_page extends State<post_page> {
           return null;
         });
         tmp.add(_url);
+        b++;
+        setState(() {
+          loadingProgress.setProgress((b * 200) / 58);
+          loadingProgress.setProgressText('Load Post Images ${b}/${a}');
+        });
       }
       img.add(tmp);
     }
     setState(() {
       _images = img;
+      isFinish = true;
     });
   }
 
   @override
   void initState() {
+    _loadingAnimate = AnimationController(vsync: this,duration: Duration(seconds: 10));
+    _loadingAnimate.repeat();
+    _loadingAnimate.addListener((){});
+    loadingProgress = LoadingProgress(_loadingAnimate);
     // TODO: implement initState
+    isFinish = false;
     super.initState();
     getPostData();
+  }
+
+  @override
+  void dispose(){
+    _loadingAnimate.dispose();
+    super.dispose();
   }
 
   @override
@@ -165,10 +196,9 @@ class _post_page extends State<post_page> {
                 ),
                 FlatButton(
                   onPressed: () {
-                    deletePost(postData).then((e)async{
-                      await getPostData().whenComplete((){
-                        print("Deleted");
-                        Navigator.of(context).pop();
+                    deletePost(postData).then((e){
+                      setState(() {
+                        getPostData();
                       });
                     });
                   },
@@ -189,7 +219,7 @@ class _post_page extends State<post_page> {
           });
     }
 
-    return Scaffold(
+    return !isFinish ? loadingProgress.getWidget(context) : Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xffff4141),
         title: Text("Searched"),

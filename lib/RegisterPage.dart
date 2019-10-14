@@ -246,7 +246,7 @@ class _register_page extends State<register_page> {
         _validateAlert("กรุณาใส่ข้อมูลให้ครบ");
         return false;
       }
-      if (_password.text != _repassword.text) {
+      if ((_password.text != _repassword.text) && isRegis) {
         _validateAlert("รหัสผ่านไม่ตรงกัน");
         return false;
       } else {
@@ -262,6 +262,60 @@ class _register_page extends State<register_page> {
     }
 
     double _width = MediaQuery.of(context).size.width;
+
+    Widget passwordBox = Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              height: 40,
+              width: _width - 80,
+              padding: EdgeInsets.only(left: 10),
+              alignment: Alignment.centerLeft,
+              decoration: BoxDecoration(
+                  color: Color(0xffFFE7E6),
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(10))),
+              child: TextField(
+                controller: _password,
+                decoration: InputDecoration.collapsed(
+                    hintText: "รหัสผ่าน"),
+                style: textField,
+              ),
+            )
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              height: 40,
+              width: _width - 80,
+              padding: EdgeInsets.only(left: 10),
+              alignment: Alignment.centerLeft,
+              decoration: BoxDecoration(
+                  color: Color(0xffFFE7E6),
+                  borderRadius: BorderRadius.all(
+                      Radius.circular(10))),
+              child: TextField(
+                controller: _repassword,
+                decoration: InputDecoration.collapsed(
+                    hintText: "ยืนยันรหัสผ่าน"),
+                style: textField,
+              ),
+            )
+          ],
+        ),
+        SizedBox(
+          height: 10,
+        ),
+      ],
+    );
+
     return Scaffold(
       body: Container(
         color: Color(0xffff4141),
@@ -383,57 +437,10 @@ class _register_page extends State<register_page> {
                                   )
                                 ],
                               ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Container(
-                                    height: 40,
-                                    width: _width - 80,
-                                    padding: EdgeInsets.only(left: 10),
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                        color: Color(0xffFFE7E6),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10))),
-                                    child: TextField(
-                                      controller: _password,
-                                      decoration: InputDecoration.collapsed(
-                                          hintText: "รหัสผ่าน"),
-                                      style: textField,
-                                    ),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Container(
-                                    height: 40,
-                                    width: _width - 80,
-                                    padding: EdgeInsets.only(left: 10),
-                                    alignment: Alignment.centerLeft,
-                                    decoration: BoxDecoration(
-                                        color: Color(0xffFFE7E6),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(10))),
-                                    child: TextField(
-                                      controller: _repassword,
-                                      decoration: InputDecoration.collapsed(
-                                          hintText: "ยืนยันรหัสผ่าน"),
-                                      style: textField,
-                                    ),
-                                  )
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
+                              SizedBox(height: 10),
+                              if(isRegis)
+                                passwordBox,
+
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
@@ -543,11 +550,9 @@ class _register_page extends State<register_page> {
                   onTap: () async {
                     if (confirmData()) {
                       if (isRegis) {
-                        print("Upload 1");
                         registerWithEmail();
-//                      _auth.createUserWithEmailAndPassword(email: _email.text, password: _register_page)
                       } else {
-//                      uploadData();
+                        uploadData();
                       }
                     }
                   },

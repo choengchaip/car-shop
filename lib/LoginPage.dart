@@ -74,14 +74,6 @@ Future logInWithEmail(BuildContext context) async {
   }
 }
 
-Future check() async {
-  final FirebaseUser user = await _auth.currentUser();
-  print("current user => ${user}");
-  if (user == null) {
-    await _googleSignIn.signOut();
-  }
-}
-
 TextEditingController _email = TextEditingController();
 TextEditingController _password = TextEditingController();
 bool _emailValidate = true;
@@ -94,6 +86,16 @@ ScrollController _scrollController = ScrollController();
 
 class _login_page extends State<login_page> with TickerProviderStateMixin {
   AnimationController _loadingAnimate;
+
+  Future check() async {
+    final FirebaseUser user = await _auth.currentUser();
+    print("current user => ${user}");
+    if (user == null) {
+      await _googleSignIn.signOut();
+    }else{
+      Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) {return main_page(0);}));
+    }
+  }
 
   @override
   void initState() {

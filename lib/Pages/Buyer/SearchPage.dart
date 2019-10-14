@@ -33,16 +33,24 @@ class _search_page extends State<search_page> {
 
   Query _query;
   List<DocumentSnapshot> brandData = List<DocumentSnapshot>();
-  List<DocumentSnapshot> modelData;
+  List<DocumentSnapshot> modelData = List<DocumentSnapshot>();
   List<String> regionData;
   Future getModel() async {
     setState(() {
-      modelData = null;
+      modelData = List<DocumentSnapshot>();
       data["model"] = "Select car model";
     });
-    _db.collection("post").where("band",isEqualTo: queryData["band"]).snapshots().listen((docs){
-      setState(() {
-        modelData = docs.documents;
+    _db.collection('post').where('band',isEqualTo: queryData['band']).getDocuments().then((docs){
+      docs.documents.forEach((data){
+        bool isHas = false;
+        for(int i=0;i<modelData.length;i++){
+          if(data.data['model'] == modelData[i].data['model']){
+            isHas = true;
+          }
+        }
+        if(!isHas){
+          modelData.add(data);
+        }
       });
     });
   }
@@ -51,7 +59,6 @@ class _search_page extends State<search_page> {
     List<String> tmpData = [];
     _db.collection("post").snapshots().listen((docs){
       docs.documents.forEach((data){
-        print(data.data["location"]);
         if(!tmpData.contains(data.data["location"])){
           tmpData.add(data.data["location"]);
         }
@@ -589,9 +596,6 @@ class _search_page extends State<search_page> {
                                                         children: <Widget>[
                                                           InkWell(
                                                             onTap: () {
-                                                              print(
-                                                                  colors[index]
-                                                                      ["name"]);
                                                               if (colors[index][
                                                                       "name"] ==
                                                                   "All") {
@@ -746,7 +750,6 @@ class _search_page extends State<search_page> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) {
-                                          print(queryData);
                                           return post_page(_query);
                                         },
                                       ),

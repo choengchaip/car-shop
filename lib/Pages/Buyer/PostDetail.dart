@@ -72,7 +72,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
 
   Future getData() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    if(user.uid == "FSRx7HLAPIcn9qxPfqe720cbBo73"){
+    if(user.uid == "zfSe7CpfZccnv1WOfvdeXuWq6Sh2"){
       setState(() {
         isAdmin = true;
       });
@@ -2156,25 +2156,6 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                         style: subText,
                                                       ),
                                                     ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Container(
-                                                      padding:
-                                                          EdgeInsets.all(3),
-                                                      decoration: BoxDecoration(
-                                                          color:
-                                                              Color(0xffe5e5e5),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          6))),
-                                                      child: Text(
-                                                        "Reply",
-                                                        style: subText,
-                                                      ),
-                                                    ),
                                                   ],
                                                 ),
                                               ),
@@ -2296,25 +2277,6 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                                             subText,
                                                                       ),
                                                                     ),
-                                                                    SizedBox(
-                                                                      width: 10,
-                                                                    ),
-                                                                    Container(
-                                                                      padding:
-                                                                          EdgeInsets.all(
-                                                                              3),
-                                                                      decoration: BoxDecoration(
-                                                                          color: Color(
-                                                                              0xffe5e5e5),
-                                                                          borderRadius:
-                                                                              BorderRadius.all(Radius.circular(6))),
-                                                                      child:
-                                                                          Text(
-                                                                        "Reply",
-                                                                        style:
-                                                                            subText,
-                                                                      ),
-                                                                    ),
                                                                   ],
                                                                 ),
                                                               ),
@@ -2358,8 +2320,8 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin{
                                                                         child:
                                                                               IgnorePointer(
                                                                                 child: TextField(
-                                                                            focusNode: _taps[index],
-                                                                            controller:
+                                                                              focusNode: _taps[index],
+                                                                                controller:
                                                                                   _inputs[index],
                                                                             style:
                                                                                   subText,

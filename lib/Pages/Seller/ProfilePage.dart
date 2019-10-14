@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sa_project/Pages/Admin/HomePage.dart';
 import 'package:sa_project/Pages/Buyer/MainPage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -25,11 +26,16 @@ class _profile_page extends State<profile_page> {
 
   var userData;
   String _images;
-
+  bool isAdmin = false;
   Future getUserData() async {
     DocumentSnapshot data;
     String imgData;
     final FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    if(user.uid == "zfSe7CpfZccnv1WOfvdeXuWq6Sh2"){
+      setState(() {
+        isAdmin = true;
+      });
+    }
     final StorageReference storageReference =
     FirebaseStorage.instance.ref().child("user_photo").child(user.uid);
     imgData = await storageReference.getDownloadURL().catchError((err) {
@@ -57,6 +63,31 @@ class _profile_page extends State<profile_page> {
 
   @override
   Widget build(BuildContext context) {
+
+    Widget adminBox = Container(
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: GestureDetector(
+              onTap: (){
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>admin_page()));
+              },
+              child: Container(
+                padding: EdgeInsets.only(left: 20),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [BoxShadow(color: Colors.grey)]
+                ),
+                alignment: Alignment.centerLeft,
+                height: 60,
+                child: Text("Go to Admin Page",style: detailText,),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+
     return Container(
       color: Color(0xffff4141),
       child: SafeArea(
@@ -114,6 +145,8 @@ class _profile_page extends State<profile_page> {
                         ],
                       ),
                       SizedBox(height: 15,),
+                      if(isAdmin)
+                        adminBox,
                       Row(
                         children: <Widget>[
                           Expanded(

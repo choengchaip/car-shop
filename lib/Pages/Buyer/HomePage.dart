@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:sa_project/LoadingProgress.dart';
 import 'MainPage.dart';
 import 'PostDetail.dart';
 import 'SearchPage.dart';
@@ -40,8 +40,10 @@ TextStyle redText = TextStyle(color: Color(0xffff4141), fontSize: 14);
 
 TextStyle contactText = TextStyle(
     color: Color(0xffff4141), fontSize: 16, fontWeight: FontWeight.bold);
-
-class _home_page extends State<home_page> {
+AnimationController _loadingAnimate;
+LoadingProgress loadingProgress;
+bool isFinish = false;
+class _home_page extends State<home_page> with TickerProviderStateMixin{
   Future getUserData() async {
     final FirebaseUser user = await FirebaseAuth.instance.currentUser();
     DocumentSnapshot dataSnapshot =
@@ -55,7 +57,6 @@ class _home_page extends State<home_page> {
       userData["avatar"] = image;
     });
   }
-
   List<DocumentSnapshot> featurePost;
   List<Map<String, dynamic>> featureData;
   List<String> images;
@@ -67,26 +68,45 @@ class _home_page extends State<home_page> {
     images = List<String>();
     featureData = List<Map<String, dynamic>>();
     queryFeatureData = List<DocumentSnapshot>();
+    setState(() {
+      loadingProgress.setProgress(50);
+      loadingProgress.setProgressText('Loading Feature Post');
+    });
     await _db.collection("clicks").orderBy("clicks",descending: true).limit(5).getDocuments().then((docs) {
       featurePost = docs.documents;
+    });
+    setState(() {
+      loadingProgress.setProgress(100);
+      loadingProgress.setProgressText('Starting Load Images');
     });
     for (int i = 0; i < featurePost.length; i++) {
       final StorageReference storageReference = FirebaseStorage.instance.ref().child("post_photo");
       String tmp = await storageReference.child(featurePost[i].data["post"]).child("0").getDownloadURL();
       setState(() {
         images.add(tmp);
+        loadingProgress.setProgress(100 + ((50 / featurePost.length)*i));
+        loadingProgress.setProgressText('Loading Images ${i}/${featurePost.length - 1}');
       });
     }
+    setState(() {
+      loadingProgress.setProgress(150);
+      loadingProgress.setProgressText('Starting Load Post Data');
+    });
     for (int i = 0; i < featurePost.length; i++) {
       final DocumentSnapshot data = await _db
           .collection("post")
           .document(featurePost[i].data["post"])
           .get();
       setState(() {
+        loadingProgress.setProgress(150 + ((50 / featurePost.length)*i));
+        loadingProgress.setProgressText('Loading Post Data ${i}/${featurePost.length - 1}');
         featureData.add(data.data);
         queryFeatureData.add(data);
       });
     }
+    setState(() {
+      isFinish = true;
+    });
   }
 
   List<int> colors = [
@@ -141,14 +161,25 @@ class _home_page extends State<home_page> {
 
   @override
   void initState() {
+    _loadingAnimate = AnimationController(vsync: this,duration: Duration(seconds: 10));
+    _loadingAnimate.repeat();
+    _loadingAnimate.addListener((){});
+    loadingProgress = LoadingProgress(_loadingAnimate);
     // TODO: implement initState
     super.initState();
     if (mounted) {
+      isFinish = false;
       getUserData();
       getFeature();
       getDealer();
       IsExpand = false;
     }
+  }
+
+  @override
+  void dispose(){
+    _loadingAnimate.dispose();
+    super.dispose();
   }
 
   @override
@@ -168,7 +199,7 @@ class _home_page extends State<home_page> {
 
     ScrollController _scroller = ScrollController();
 
-    return Container(
+    return !isFinish ? loadingProgress.getSubWidget(context) : Container(
       color: Color(0xffff4141),
       child: SafeArea(
         child: Container(
@@ -266,6 +297,7 @@ class _home_page extends State<home_page> {
                                             MainAxisAlignment.center,
                                         children: <Widget>[
                                           Container(
+                                            width: 60,
                                             height: 60,
                                             decoration: BoxDecoration(
                                                 color: Colors.white,
