@@ -240,8 +240,7 @@ class _home_page extends State<home_page> {
             .child("post_photo")
             .child(ref.documentID)
             .child(i.toString());
-        StorageUploadTask storageUploadTask =
-            storageReference.putFile(images[i]);
+        StorageUploadTask storageUploadTask = storageReference.putFile(images[i]);
         await (await storageUploadTask.onComplete).ref.getDownloadURL();
       }
       await _db.collection("clicks").add({"clicks": 0, "post": ref.documentID});

@@ -22,7 +22,9 @@ class _dealer_detail extends State<dealer_detail> {
   DocumentSnapshot queryData;
   final Firestore _db = Firestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  double latPoint = 10;
+  double lonPoint = 10;
+  String shopName = '';
   _dealer_detail(this.queryData);
 
   List<DocumentSnapshot> postData;
@@ -31,10 +33,6 @@ class _dealer_detail extends State<dealer_detail> {
   int clicks = 0;
   Completer<GoogleMapController> _controller = Completer();
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(13.6900043, 100.7479237),
-    zoom: 16,
-  );
 
   TextStyle topbarText =
       TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
@@ -142,6 +140,18 @@ class _dealer_detail extends State<dealer_detail> {
   }
 
   Future getDealerData() async {
+    await _db.collection('buyer').document(queryData.documentID).get().then((data){
+      setState(() {
+        latPoint = data.data['lat'];
+        lonPoint = data.data['long'];
+        if(data.data['lat'] == null){
+          latPoint = 10;
+        }
+        if(data.data['long'] == null){
+          lonPoint = 10;
+        }
+      });
+    });
     String url;
     try {
       StorageReference ref = await FirebaseStorage.instance
@@ -169,6 +179,10 @@ class _dealer_detail extends State<dealer_detail> {
 
   @override
   Widget build(BuildContext context) {
+    final CameraPosition _position = CameraPosition(
+      target: LatLng(latPoint, lonPoint),
+      zoom: 16,
+    );
     double _width = MediaQuery.of(context).size.width;
     double _height = MediaQuery.of(context).size.height;
     LocationData currentLocation;
@@ -523,13 +537,12 @@ class _dealer_detail extends State<dealer_detail> {
             markers: {
               Marker(
                   markerId: MarkerId("1"),
-                  position: LatLng(13.6900043, 100.7479237),
+                  position: LatLng(latPoint, lonPoint),
                   infoWindow: InfoWindow(
-                      title: "สนามบินสุวรรณภูมิ",
-                      snippet: "สนามบินนานาชาติของประเทศไทย")),
+                      title: queryData.data['passpord'])),
             },
             mapType: MapType.normal,
-            initialCameraPosition: _kGooglePlex,
+            initialCameraPosition: _position,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
             },

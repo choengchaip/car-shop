@@ -164,9 +164,8 @@ class _contact_page extends State<contact_page> {
           "phone": _mobile.text,
           "passpord": _passpord.text,
           "about": _about.text,
-          "clicks": 0,
           "lat" : latPoint,
-          "long" : lonPoint
+          "long" : lonPoint,
         };
       }else{
         data = {
@@ -177,7 +176,8 @@ class _contact_page extends State<contact_page> {
           "passpord": _passpord.text,
           "about": _about.text,
           "lat" : latPoint,
-          "long" : lonPoint
+          "long" : lonPoint,
+          "clicks": 0
         };
       }
       userData.addAll(data);
