@@ -6,11 +6,10 @@ import 'package:sa_project/Pages/Buyer/PostDetail.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:location/location.dart';
+import 'package:flutter/services.dart';
 
 class dealer_detail extends StatefulWidget {
   DocumentSnapshot queryData;
-
-//  var location = new Location();
   dealer_detail(this.queryData);
 
   @override
@@ -33,7 +32,7 @@ class _dealer_detail extends State<dealer_detail> {
   Completer<GoogleMapController> _controller = Completer();
 
   static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(13.7650836, 100.5379664),
+    target: LatLng(13.6900043, 100.7479237),
     zoom: 16,
   );
 
@@ -172,6 +171,24 @@ class _dealer_detail extends State<dealer_detail> {
   Widget build(BuildContext context) {
     double _width = MediaQuery.of(context).size.width;
     double _height = MediaQuery.of(context).size.height;
+    LocationData currentLocation;
+
+    Future<LocationData> getLocate() async {
+      Location location = Location();
+      try {
+        return await location.getLocation();
+      } on PlatformException catch (e) {
+        if (e.code == 'PERMISSION_DENIED') {
+          // Permission denied
+        }
+        return null;
+      }
+    }
+
+    Future printLocate()async{
+      currentLocation = await getLocate();
+      print(currentLocation.latitude);
+    }
 
     Widget listCar = ListView(
       children: List.generate(
@@ -495,22 +512,30 @@ class _dealer_detail extends State<dealer_detail> {
       ),
     );
 
-    Widget location = Container(
-      height: (_height - 125 - 60) / 2,
-      color: Colors.grey,
-      child: GoogleMap(
-        markers: {
-          Marker(
-              markerId: MarkerId("1"),
-              position: LatLng(13.6900043, 100.7479237),
-              infoWindow: InfoWindow(title: "สนามบินสุวรรณภูมิ", snippet: "สนามบินนานาชาติของประเทศไทย")),
-        },
-        mapType: MapType.normal,
-        initialCameraPosition: _kGooglePlex,
-        onMapCreated: (GoogleMapController controller) {
-          _controller.complete(controller);
-        },
-      ),
+    Widget location = Column(
+      children: <Widget>[
+        Container(
+          height: (_height - 125 - 60) / 2,
+          color: Colors.grey,
+          child: GoogleMap(
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
+            markers: {
+              Marker(
+                  markerId: MarkerId("1"),
+                  position: LatLng(13.6900043, 100.7479237),
+                  infoWindow: InfoWindow(
+                      title: "สนามบินสุวรรณภูมิ",
+                      snippet: "สนามบินนานาชาติของประเทศไทย")),
+            },
+            mapType: MapType.normal,
+            initialCameraPosition: _kGooglePlex,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
+          ),
+        ),
+      ],
     );
 
     return Scaffold(

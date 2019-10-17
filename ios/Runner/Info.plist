@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-
-    <key>io.flutter.embedded_views_preview</key>
-    <true/>
-
     <key>CFBundleURLTypes</key>
     <array>
         <dict>
@@ -26,7 +22,6 @@
     	</dict>
     </array>
 
-
     <key>FacebookAppID</key>
     <string>722908581467808</string>
 
@@ -40,10 +35,6 @@
         <string>fbauth2</string>
         <string>fbshareextension</string>
     </array>
-
-    <key>io.flutter.embedded_views_preview</key>
-    <true/>
-
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -89,6 +80,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>This app needs your location to test the location feature of the Google Maps plugin.</string>
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
 
 </dict>
 </plist>

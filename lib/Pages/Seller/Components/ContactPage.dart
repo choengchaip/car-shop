@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:location/location.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 
 class contact_page extends StatefulWidget {
   _contact_page createState() => _contact_page();
@@ -13,7 +17,7 @@ final FirebaseAuth _auth = FirebaseAuth.instance;
 final Firestore _db = Firestore.instance;
 
 class _contact_page extends State<contact_page> {
-  Map<String,dynamic> userData = Map<String,dynamic>();
+  Map<String, dynamic> userData = Map<String, dynamic>();
   TextStyle detailText = TextStyle(
       color: Color(0xff434343), fontSize: 16, fontWeight: FontWeight.bold);
 
@@ -36,10 +40,16 @@ class _contact_page extends State<contact_page> {
   TextEditingController _passpord = TextEditingController();
   TextEditingController _about = TextEditingController();
 
+  double latPoint = 0.0;
+  double lonPoint = 0.0;
+
+  Completer<GoogleMapController> _controller = Completer();
+
   getUserData() async {
     final FirebaseUser user = await _auth.currentUser();
     Map<String, dynamic> data = Map<String, dynamic>();
-    final DocumentSnapshot ref = await _db.collection("buyer").document(user.uid).get();
+    final DocumentSnapshot ref =
+        await _db.collection("buyer").document(user.uid).get();
     data = ref.data;
 
     final StorageReference passportRef = await FirebaseStorage.instance
@@ -72,7 +82,6 @@ class _contact_page extends State<contact_page> {
       _passpord.text = userData != null ? userData["passpord"] : "";
       _about.text = userData != null ? userData["about"] : "";
     });
-
   }
 
   File _passportImage;
@@ -97,21 +106,22 @@ class _contact_page extends State<contact_page> {
           FirebaseStorage.instance.ref().child("face_photo").child(user.uid);
       ref2.putFile(_faceImage);
     }
-
   }
 
   String _urlId;
   String _urlPassport;
 
   Future idImage() async {
-    final file = await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 380);
+    final file =
+        await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 380);
     setState(() {
       _passportImage = file;
     });
   }
 
   Future faceImage() async {
-    final file = await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 380);
+    final file =
+        await ImagePicker.pickImage(source: ImageSource.gallery, maxWidth: 380);
     setState(() {
       _faceImage = file;
     });
@@ -126,18 +136,50 @@ class _contact_page extends State<contact_page> {
 
   @override
   Widget build(BuildContext context) {
+    LocationData currentLocation;
+    Future<LocationData> getLocation() async{
+      Location location = Location();
+      try {
+        return await location.getLocation();
+      } on PlatformException catch (e) {
+        if (e.code == 'PERMISSION_DENIED') {
+          // Permission denied
+        }
+        return null;
+      }
+    }
 
     Future uploadData() async {
       final FirebaseUser user = await _auth.currentUser();
-      var data = {
-        "firstName": _firstname.text,
-        "lastName": _lastname.text,
-        "email": _email.text,
-        "phone": _mobile.text,
-        "passpord": _passpord.text,
-        "about": _about.text,
-        "clicks":0
-      };
+      bool isHas = false;
+      await _db.collection('buyer').document(user.uid).get().then((data){
+        isHas = true;
+      });
+      var data;
+      if(isHas){
+        data = {
+          "firstName": _firstname.text,
+          "lastName": _lastname.text,
+          "email": _email.text,
+          "phone": _mobile.text,
+          "passpord": _passpord.text,
+          "about": _about.text,
+          "clicks": 0,
+          "lat" : latPoint,
+          "long" : lonPoint
+        };
+      }else{
+        data = {
+          "firstName": _firstname.text,
+          "lastName": _lastname.text,
+          "email": _email.text,
+          "phone": _mobile.text,
+          "passpord": _passpord.text,
+          "about": _about.text,
+          "lat" : latPoint,
+          "long" : lonPoint
+        };
+      }
       userData.addAll(data);
       print(userData);
       await _db.collection("buyer").document(user.uid).setData(userData);
@@ -330,7 +372,7 @@ class _contact_page extends State<contact_page> {
                     Container(
                       height: 60,
                       decoration:
-                      BoxDecoration(color: Colors.white, boxShadow: [
+                          BoxDecoration(color: Colors.white, boxShadow: [
                         BoxShadow(color: Colors.grey),
                       ]),
                       padding: EdgeInsets.only(left: 20),
@@ -488,6 +530,57 @@ class _contact_page extends State<contact_page> {
                         ],
                       ),
                     ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: <Widget>[
+                        Container(
+                          height: 300,
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(10.000, 10.000),
+                            ),
+                            mapType: MapType.normal,
+                            myLocationEnabled: true,
+                            myLocationButtonEnabled: false,
+                            onMapCreated: (GoogleMapController controller) {
+                              _controller.complete(controller);
+                            },
+                          ),
+                        ),
+                        Container(
+                          height: 70,
+                          width: 80,
+                          child: Column(
+                            children: <Widget>[
+                              GestureDetector(
+                                onTap: ()async{
+                                  final GoogleMapController current = await _controller.future;
+                                  currentLocation = await getLocation();
+                                  current.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(currentLocation.latitude, currentLocation.longitude),zoom: 16)));
+                                  setState((){
+                                    latPoint = currentLocation.latitude;
+                                    lonPoint = currentLocation.longitude;
+                                  });
+                                },
+                                child: Container(
+                                  alignment: Alignment.center,
+                                  width: 60,
+                                  height: 60,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                                  ),
+                                  child: Icon(Icons.location_on),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                     Container(
                       padding: EdgeInsets.only(top: 15, left: 15, right: 15),
                       child: Text(
@@ -504,15 +597,15 @@ class _contact_page extends State<contact_page> {
                     ),
                     SizedBox(
                       height: 15,
-                    )
+                    ),
                   ],
                 ),
               ),
             ),
             InkWell(
-              onTap: () async{
+              onTap: () async {
                 await uploadImages();
-                await uploadData().then((e){
+                await uploadData().then((e) {
                   Navigator.of(context).pop("Ok");
                 });
               },
