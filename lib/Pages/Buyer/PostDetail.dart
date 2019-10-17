@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-
 import 'DealerDetail.dart';
 
 class post_detail extends StatefulWidget {
@@ -2749,7 +2748,9 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
                                         child: Container(
                                           child: Column(children: <Widget>[
                                             InkWell(
-                                              onTap: () async {},
+                                              onTap: () async {
+
+                                              },
                                               child: Container(
                                                   alignment: Alignment.center,
                                                   height: 40,

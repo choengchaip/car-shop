@@ -7,9 +7,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:location/location.dart';
 import 'package:flutter/services.dart';
+import 'package:webview_flutter/platform_interface.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class dealer_detail extends StatefulWidget {
   DocumentSnapshot queryData;
+
   dealer_detail(this.queryData);
 
   @override
@@ -24,15 +27,17 @@ class _dealer_detail extends State<dealer_detail> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   double latPoint = 10;
   double lonPoint = 10;
+  double myLatPoint = 10;
+  double myLonPoint = 10;
   String shopName = '';
-  _dealer_detail(this.queryData);
 
+  _dealer_detail(this.queryData);
+  LocationData currentLocation;
   List<DocumentSnapshot> postData;
   var _images;
   String bgImg;
   int clicks = 0;
   Completer<GoogleMapController> _controller = Completer();
-
 
   TextStyle topbarText =
       TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
@@ -140,14 +145,18 @@ class _dealer_detail extends State<dealer_detail> {
   }
 
   Future getDealerData() async {
-    await _db.collection('buyer').document(queryData.documentID).get().then((data){
+    await _db
+        .collection('buyer')
+        .document(queryData.documentID)
+        .get()
+        .then((data) {
       setState(() {
         latPoint = data.data['lat'];
         lonPoint = data.data['long'];
-        if(data.data['lat'] == null){
+        if (data.data['lat'] == null) {
           latPoint = 10;
         }
-        if(data.data['long'] == null){
+        if (data.data['long'] == null) {
           lonPoint = 10;
         }
       });
@@ -167,11 +176,34 @@ class _dealer_detail extends State<dealer_detail> {
     });
   }
 
+  Future<LocationData> getLocate() async {
+    Location location = Location();
+    try {
+      return await location.getLocation();
+    } on PlatformException catch (e) {
+      if (e.code == 'PERMISSION_DENIED') {
+        // Permission denied
+      }
+      return null;
+    }
+  }
+
+  Future defineLocate() async {
+    currentLocation = await getLocate();
+    setState(() {
+      myLatPoint = currentLocation.latitude;
+      myLonPoint = currentLocation.longitude;
+      print(myLatPoint);
+      print(myLonPoint);
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     selector = Selector.listing;
+    defineLocate();
     getCarData();
     getDealerData();
     sendClick();
@@ -185,24 +217,6 @@ class _dealer_detail extends State<dealer_detail> {
     );
     double _width = MediaQuery.of(context).size.width;
     double _height = MediaQuery.of(context).size.height;
-    LocationData currentLocation;
-
-    Future<LocationData> getLocate() async {
-      Location location = Location();
-      try {
-        return await location.getLocation();
-      } on PlatformException catch (e) {
-        if (e.code == 'PERMISSION_DENIED') {
-          // Permission denied
-        }
-        return null;
-      }
-    }
-
-    Future printLocate()async{
-      currentLocation = await getLocate();
-      print(currentLocation.latitude);
-    }
 
     Widget listCar = ListView(
       children: List.generate(
@@ -528,24 +542,20 @@ class _dealer_detail extends State<dealer_detail> {
 
     Widget location = Column(
       children: <Widget>[
-        Container(
-          height: (_height - 125 - 60) / 2,
-          color: Colors.grey,
-          child: GoogleMap(
-            myLocationEnabled: true,
-            myLocationButtonEnabled: true,
-            markers: {
-              Marker(
-                  markerId: MarkerId("1"),
-                  position: LatLng(latPoint, lonPoint),
-                  infoWindow: InfoWindow(
-                      title: queryData.data['passpord'])),
-            },
-            mapType: MapType.normal,
-            initialCameraPosition: _position,
-            onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
-            },
+        Expanded(
+          child: Container(
+            height: 400,
+            color: Colors.black,
+            child: GestureDetector(
+              onTap: (){
+                print("Hello");
+              },
+              child: WebView(
+                initialUrl:
+                    'https://www.google.com/maps/dir/?api=1&origin=${myLatPoint}, ${myLonPoint}&destination=${latPoint}, ${lonPoint}',
+                javascriptMode: JavascriptMode.unrestricted,
+              ),
+            ),
           ),
         ),
       ],

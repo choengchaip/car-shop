@@ -34,6 +34,7 @@ dependencies:
   flutter_facebook_login: ^3.0.0
   google_maps_flutter: ^0.5.21+7
   location: ^2.3.5
+  webview_flutter: ^0.3.15+1
 
 dev_dependencies:
   flutter_test:
