@@ -73,6 +73,7 @@ class _register_page extends State<register_page> {
     DocumentSnapshot snapshot =
         await db.collection("accounts").document(id).get();
 
+
     setState(() {
       if (snapshot.data == null) {
         IsHas = false;
@@ -91,6 +92,7 @@ class _register_page extends State<register_page> {
   TextEditingController _repassword = TextEditingController();
 
   bool keyboardExpand = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -198,6 +200,8 @@ class _register_page extends State<register_page> {
           });
     }
 
+
+
     Future _successAlert(String header) async {
       showDialog(
           context: context,
@@ -231,7 +235,7 @@ class _register_page extends State<register_page> {
       if (IsHas) {
         _successAlert("สมัครสมาชิกสำเร็จ!");
       } else {
-        _validateAlert("สมัครสมาชิกม่สำเร็จ");
+        _validateAlert("สมัครสมาชิกไม่สำเร็จ!");
       }
     }
 

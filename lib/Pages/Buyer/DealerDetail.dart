@@ -7,8 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:async';
 import 'package:location/location.dart';
 import 'package:flutter/services.dart';
-import 'package:webview_flutter/platform_interface.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'GoogleMap.dart';
 
 class dealer_detail extends StatefulWidget {
   DocumentSnapshot queryData;
@@ -32,6 +31,7 @@ class _dealer_detail extends State<dealer_detail> {
   String shopName = '';
 
   _dealer_detail(this.queryData);
+
   LocationData currentLocation;
   List<DocumentSnapshot> postData;
   var _images;
@@ -193,8 +193,6 @@ class _dealer_detail extends State<dealer_detail> {
     setState(() {
       myLatPoint = currentLocation.latitude;
       myLonPoint = currentLocation.longitude;
-      print(myLatPoint);
-      print(myLonPoint);
     });
   }
 
@@ -543,19 +541,21 @@ class _dealer_detail extends State<dealer_detail> {
     Widget location = Column(
       children: <Widget>[
         Expanded(
-          child: Container(
-            height: 400,
-            color: Colors.black,
-            child: GestureDetector(
-              onTap: (){
-                print("Hello");
-              },
-              child: WebView(
-                initialUrl:
-                    'https://www.google.com/maps/dir/?api=1&origin=${myLatPoint}, ${myLonPoint}&destination=${latPoint}, ${lonPoint}',
-                javascriptMode: JavascriptMode.unrestricted,
+          child: GoogleMap(
+            onTap: (coor){
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>google_page(coor: coor,)));
+            },
+            initialCameraPosition: _position,
+            markers: {
+              Marker(
+                  markerId: MarkerId(('1'),),
+                  position: LatLng(latPoint, lonPoint),
+                  infoWindow: InfoWindow(title: queryData.data['passpord'],),
               ),
-            ),
+            },
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
           ),
         ),
       ],
@@ -570,6 +570,10 @@ class _dealer_detail extends State<dealer_detail> {
         ),
         actions: <Widget>[
           IconButton(
+            onPressed: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => google_page()));
+            },
             icon: Icon(
               Icons.share,
               size: 25,
