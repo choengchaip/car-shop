@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class inbox_page extends StatefulWidget {
   _inbox_page createState() => _inbox_page();
@@ -20,6 +21,7 @@ class _inbox_page extends State<inbox_page> {
   final Firestore _auth = Firestore.instance;
 
   DocumentSnapshot _data;
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   checkInbox()async{
     DocumentSnapshot data = await _auth.collection("notification").document("a").get();
@@ -33,6 +35,20 @@ class _inbox_page extends State<inbox_page> {
     // TODO: implement initState
     super.initState();
     checkInbox();
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message){
+        print('OnMess : ${message}');
+      },
+      onResume: (Map<String, dynamic> message){
+        print('OnRes : ${message}');
+      },
+      onLaunch: (Map<String, dynamic> message){
+        print('OnLau : ${message}');
+      },
+      onBackgroundMessage: (Map<String, dynamic> message){
+        print('OnBackMess : ${message}');
+      }
+    );
   }
 
   @override
