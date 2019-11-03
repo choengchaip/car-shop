@@ -3,6 +3,7 @@ import './HomePage.dart';
 import './InboxPage.dart';
 import './ProfilePage.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class main_page extends StatefulWidget {
   int indexPage;
@@ -14,15 +15,20 @@ class main_page extends StatefulWidget {
 
 class _main_page extends State<main_page> {
   int indexPage;
-
+  bool isNoti = true;
   _main_page(this.indexPage);
 
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   List<Widget> pages = [home_page(), inbox_page(), profile_page()];
   int _currentIndex = 0;
 
   bottomTap(int index) {
     setState(() {
       _currentIndex = index;
+      print(_currentIndex);
+      if(_currentIndex == 1){
+        isNoti = false;
+      }
     });
   }
 
@@ -37,6 +43,25 @@ class _main_page extends State<main_page> {
     // TODO: implement initState
     super.initState();
     goToPage();
+    _firebaseMessaging.configure(
+      onLaunch: (Map<String, dynamic> message){
+        print('onlaus');
+        print(message);
+      },
+      onMessage: (Map<String, dynamic> message){
+        setState(() {
+          if(_currentIndex != 1){
+            isNoti = true;
+          }
+          print('onMess');
+          print(message);
+        });
+      },
+      onResume: (Map<String, dynamic> message){
+        print('onRes');
+        print(message);
+      }
+    );
   }
 
   @override
@@ -53,7 +78,26 @@ class _main_page extends State<main_page> {
             BottomNavigationBarItem(
                 title: Text("หน้าแรก"), icon: Icon(Icons.home)),
             BottomNavigationBarItem(
-                title: Text("แจ้งเตือน"), icon: Icon(Icons.notifications)),
+              title: Text('แจ้งเตือน'),
+              icon: Stack(
+                alignment: Alignment.topRight,
+                children: <Widget>[
+                  Container(
+                    child: Icon(Icons.notifications),
+                  ),
+                  Container(
+                    width: isNoti == true ? 8 : 0,
+                    height: isNoti == true ? 8 : 0,
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(50),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             BottomNavigationBarItem(
                 title: Text("บัญชี"), icon: Icon(Icons.account_circle)),
           ]),

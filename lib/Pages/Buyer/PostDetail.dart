@@ -2578,8 +2578,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
                                             }
                                             loadingPopup();
                                             FocusScope.of(context).unfocus();
-                                            await toHeader(headerText.text,
-                                                    myuser["uid"])
+                                            await toHeader(headerText.text, myuser["uid"])
                                                 .then((err) async {
                                               await getBlogDetail();
                                             }).then((e) {

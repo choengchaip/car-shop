@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import './Pages/Buyer/MainPage.dart';
 import 'LoginPage.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class register_page extends StatefulWidget {
   _register_page createState() => _register_page();
@@ -20,7 +21,7 @@ final _auth = FirebaseAuth.instance;
 
 class _register_page extends State<register_page> {
   TextStyle textField = TextStyle(fontWeight: FontWeight.bold);
-
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   TextStyle confirmText =
       TextStyle(fontWeight: FontWeight.bold, color: Colors.white);
 
@@ -121,7 +122,7 @@ class _register_page extends State<register_page> {
       await db
           .collection("accounts")
           .document(user.uid)
-          .setData({"status": true}).then((err) {
+          .setData({"status": true,'token':_firebaseMessaging.getToken()}).then((err) {
         print("Success:1 /");
       });
 

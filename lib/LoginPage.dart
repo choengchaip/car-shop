@@ -7,11 +7,12 @@ import 'Pages/Buyer/MainPage.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class login_page extends StatefulWidget {
   _login_page createState() => _login_page();
 }
-
+FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 final GoogleSignIn _googleSignIn = GoogleSignIn();
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final db = Firestore.instance;
@@ -62,16 +63,22 @@ void _noUserFound(BuildContext context) {
 
 Future logInWithEmail(BuildContext context) async {
   try {
-    final FirebaseUser user = (await _auth.signInWithEmailAndPassword(
-            email: _email.text, password: _password.text))
-        .user;
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      return main_page(0);
-    }));
+    final FirebaseUser user = (await _auth.signInWithEmailAndPassword(email: _email.text, password: _password.text)).user;
+    setToken().then((err){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+        return main_page(0);
+      }));
+    });
   } catch (e) {
     _noUserFound(context);
     print(e);
   }
+}
+
+Future setToken()async{
+  FirebaseUser user = await _auth.currentUser();
+  String token = await _firebaseMessaging.getToken();
+  db.collection('accounts').document(user.uid).updateData({'token': token});
 }
 
 TextEditingController _email = TextEditingController();
@@ -93,7 +100,9 @@ class _login_page extends State<login_page> with TickerProviderStateMixin {
     if (user == null) {
       await _googleSignIn.signOut();
     }else{
-      Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) {return main_page(0);}));
+      setToken().then((err){
+        Navigator.pushReplacement(context,MaterialPageRoute(builder: (context) {return main_page(0);}));
+      });
     }
   }
 
@@ -372,19 +381,21 @@ class _login_page extends State<login_page> with TickerProviderStateMixin {
                                   loadingPopup();
                                   logInWithGoogle().then((err) {
                                     checkUser().then((err) {
-                                      if (IsHas) {
-                                        Navigator.pushReplacement(context,
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                          return main_page(0);
-                                        }));
-                                      } else {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    register_page()));
-                                      }
+                                      setToken().then((err){
+                                        if (IsHas) {
+                                          Navigator.pushReplacement(context,
+                                              MaterialPageRoute(
+                                                  builder: (context) {
+                                                    return main_page(0);
+                                                  }));
+                                        } else {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      register_page()));
+                                        }
+                                      });
                                     });
                                   }).catchError((e) {
                                     Navigator.of(context).pop();
@@ -431,19 +442,21 @@ class _login_page extends State<login_page> with TickerProviderStateMixin {
                                   loadingPopup();
                                   loginWithFacebook().then((e) {
                                     checkUser().then((ee) {
-                                      if (IsHas) {
-                                        Navigator.pushReplacement(context,
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                          return main_page(0);
-                                        }));
-                                      } else {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    register_page()));
-                                      }
+                                      setToken().then((err){
+                                        if (IsHas) {
+                                          Navigator.pushReplacement(context,
+                                              MaterialPageRoute(
+                                                  builder: (context) {
+                                                    return main_page(0);
+                                                  }));
+                                        } else {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      register_page()));
+                                        }
+                                      });
                                     });
                                   }).catchError((e) {
                                     Navigator.of(context).pop();
