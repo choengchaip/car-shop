@@ -8,6 +8,7 @@ import './Pages/Buyer/MainPage.dart';
 import 'LoginPage.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'LoadingProgress.dart';
 
 class register_page extends StatefulWidget {
   _register_page createState() => _register_page();
@@ -19,19 +20,33 @@ bool isRegis = true;
 File _image;
 final _auth = FirebaseAuth.instance;
 
-class _register_page extends State<register_page> {
+class _register_page extends State<register_page> with TickerProviderStateMixin{
   TextStyle textField = TextStyle(fontWeight: FontWeight.bold);
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   TextStyle confirmText =
       TextStyle(fontWeight: FontWeight.bold, color: Colors.white);
 
   bool IsHas = false;
+  bool isLoad = false;
+  AnimationController _animationController;
+  LoadingProgress _loadingProgress;
 
   @override
   void initState() {
+    _animationController = AnimationController(vsync: this,duration: Duration(seconds: 10));
+    _animationController.addListener((){});
+    _animationController.repeat();
+    _loadingProgress = LoadingProgress(_animationController);
+
     // TODO: implement initState
     super.initState();
     getUserData();
+  }
+
+  @override
+  void dispose(){
+    super.dispose();
+    _animationController.dispose();
   }
 
   Future getUserData() async {
@@ -115,14 +130,29 @@ class _register_page extends State<register_page> {
     }
 
     Future uploadData() async {
+
+
+      setState((){
+        isLoad = true;
+        _loadingProgress.setProgress(50);
+        _loadingProgress.setProgressText('Start Signing up ...');
+      });
+
+      String token = await _firebaseMessaging.getToken();
+
       final FirebaseUser user = await FirebaseAuth.instance.currentUser();
-      StorageReference storageRef =
-          FirebaseStorage.instance.ref().child("user_photo").child(user.uid);
+      StorageReference storageRef = FirebaseStorage.instance.ref().child("user_photo").child(user.uid);
+
+
+      setState((){
+        _loadingProgress.setProgress(100);
+        _loadingProgress.setProgressText('Upload User Data');
+      });
 
       await db
           .collection("accounts")
           .document(user.uid)
-          .setData({"status": true,'token':_firebaseMessaging.getToken()}).then((err) {
+          .setData({"status": true,'token': token}).then((err) {
         print("Success:1 /");
       });
 
@@ -134,13 +164,30 @@ class _register_page extends State<register_page> {
         print("Success:2 /");
       });
 
+      setState((){
+        _loadingProgress.setProgress(150);
+        _loadingProgress.setProgressText('Upload Image');
+      });
+
+
       if (_image != null) {
         StorageUploadTask mission = storageRef.putFile(_image);
         mission.onComplete.then((err) {
           print("Success:3 /");
+          setState((){
+            _loadingProgress.setProgress(175);
+            _loadingProgress.setProgressText('Finishing');
+            isLoad = false;
+          });
+
           checkUser().then((s) {
             if (IsHas) {
               if (!isRegis) {
+                setState((){
+                  _loadingProgress.setProgress(200);
+                  _loadingProgress.setProgressText('Finished');
+                  isLoad = true;
+                });
                 showDialog(
                     context: context,
                     builder: (context) {
@@ -149,7 +196,10 @@ class _register_page extends State<register_page> {
                         actions: <Widget>[
                           FlatButton(
                               onPressed: () {
-                                Navigator.of(context).pop();
+                                Navigator.pushReplacement(context,
+                                    MaterialPageRoute(builder: (context) {
+                                      return main_page(0);
+                                    }));
                               },
                               child: Text("ตกลง"))
                         ],
@@ -321,7 +371,7 @@ class _register_page extends State<register_page> {
       ],
     );
 
-    return Scaffold(
+    return isLoad == true ? _loadingProgress.getWidget(context) : Scaffold(
       body: Container(
         color: Color(0xffff4141),
         child: SafeArea(

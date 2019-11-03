@@ -53,9 +53,11 @@ class _favor_page extends State<favor_page> with TickerProviderStateMixin{
       loadingProgress.setProgress(0);
       loadingProgress.setProgressText('Starting Load Favor Data');
     });
+
     await _db.collection('favor').where('uid',isEqualTo: user.uid).getDocuments().then((docs){
       datas = docs.documents;
     });
+
     setState((){
       loadingProgress.setProgress(100);
       loadingProgress.setProgressText('Starting Load Post Data');

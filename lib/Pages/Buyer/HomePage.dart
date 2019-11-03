@@ -64,6 +64,7 @@ class _home_page extends State<home_page> with TickerProviderStateMixin{
   List<String> dealer_images;
   List<DocumentSnapshot> queryFeatureData;
   List<DocumentSnapshot> queryDealerData;
+  int AllPost;
 
   Future getFeature() async {
     images = List<String>();
@@ -72,6 +73,11 @@ class _home_page extends State<home_page> with TickerProviderStateMixin{
     setState(() {
       loadingProgress.setProgress(50);
       loadingProgress.setProgressText('Loading Feature Post');
+    });
+    await _db.collection('post').getDocuments().then((docs){
+      setState(() {
+        AllPost = docs.documents.length;
+      });
     });
     await _db.collection("clicks").orderBy("clicks",descending: true).limit(5).getDocuments().then((docs) {
       featurePost = docs.documents;
@@ -344,7 +350,7 @@ class _home_page extends State<home_page> with TickerProviderStateMixin{
                                             Container(
                                               alignment: Alignment.centerLeft,
                                               child: Text(
-                                                "We have more than 23486 cars.",
+                                                "We have more than ${AllPost.toString()} cars.",
                                                 style: topbarSubText,
                                               ),
                                             ),

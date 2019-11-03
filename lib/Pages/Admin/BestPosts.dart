@@ -61,6 +61,7 @@ class _best_post extends State<best_post> with TickerProviderStateMixin{
       await _db.collection('buyer').document(details[i].data['uid']).get().then((data){
         dealers.add(data);
       });
+
       setState(() {
         loadingProgress.setProgress(100 + ((50 / details.length)*i));
         loadingProgress.setProgressText('Loading Dealer Data ${i}/${details.length-1}');

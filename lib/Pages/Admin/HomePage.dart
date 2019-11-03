@@ -443,18 +443,23 @@ class _admin_page extends State<admin_page> {
                     SizedBox(
                       height: 15,
                     ),
-                    Container(
-                      height: 100,
-                      alignment: Alignment.center,
-                      padding: EdgeInsets.only(right: 10),
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border(
-                              top: BorderSide(color: Color(0xffe5e5e5)),
-                              bottom: BorderSide(color: Color(0xffe5e5e5)))),
-                      child: Text(
-                        'Price Analysis',
-                        style: analText,
+                    GestureDetector(
+                      onTap: (){
+
+                      },
+                      child: Container(
+                        height: 100,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border(
+                                top: BorderSide(color: Color(0xffe5e5e5)),
+                                bottom: BorderSide(color: Color(0xffe5e5e5)))),
+                        child: Text(
+                          'Price Analysis',
+                          style: analText,
+                        ),
                       ),
                     ),
                   ],

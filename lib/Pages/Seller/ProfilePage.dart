@@ -6,7 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sa_project/Pages/Buyer/AccountPage.dart';
 import 'package:sa_project/LoginPage.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 
 class profile_page extends StatefulWidget {
@@ -23,6 +23,7 @@ class _profile_page extends State<profile_page> {
 
   TextStyle logoutText = TextStyle(color: Color(0xffff4141), fontSize: 16,fontWeight: FontWeight.bold);
   final Firestore _db = Firestore.instance;
+  FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
 
   var userData;
   String _images;
@@ -49,6 +50,12 @@ class _profile_page extends State<profile_page> {
   }
 
   Future logout()async{
+    String token = await _firebaseMessaging.getToken();
+    await _db.collection('accounts').where('token', isEqualTo: token).getDocuments().then((docs){
+      docs.documents.forEach((data){
+        _db.collection('accounts').document(data.documentID).updateData({'token':''});
+      });
+    });
     print("logging out ...");
     await FirebaseAuth.instance.signOut();
     print("logged out");
