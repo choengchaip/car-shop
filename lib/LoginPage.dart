@@ -79,6 +79,8 @@ Future setToken()async{
   FirebaseUser user = await _auth.currentUser();
   String token = await _firebaseMessaging.getToken();
   db.collection('accounts').document(user.uid).updateData({'token': token});
+  print(user.uid);
+  print(token);
 }
 
 TextEditingController _email = TextEditingController();

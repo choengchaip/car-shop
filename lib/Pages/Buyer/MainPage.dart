@@ -15,7 +15,7 @@ class main_page extends StatefulWidget {
 
 class _main_page extends State<main_page> {
   int indexPage;
-  bool isNoti = true;
+  bool isNoti = false;
   _main_page(this.indexPage);
 
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();

@@ -31,8 +31,9 @@ class _inbox_page extends State<inbox_page> {
 
   Future checkInbox() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    print(user.uid);
     print('Loading ...');
-    _db.collection("notifications").where(user.uid).snapshots().listen((docs) {
+    _db.collection("notifications").where('uid', isEqualTo: user.uid).snapshots().listen((docs) {
       setState(() {
         noti = docs.documents;
       });
@@ -41,7 +42,7 @@ class _inbox_page extends State<inbox_page> {
           setState(() {
             _data.add(d);
           });
-          loadImage(data.data['post']);
+          loadImage(data.data['from']);
         });
       });
     });
@@ -51,13 +52,8 @@ class _inbox_page extends State<inbox_page> {
     _db.collection('notifications').document(post).updateData({'checked': true});
   }
 
-  Future loadImage(String post) async {
-    String url = await FirebaseStorage.instance
-        .ref()
-        .child('post_photo')
-        .child(post)
-        .child('0')
-        .getDownloadURL();
+  Future loadImage(String from) async {
+    String url = await FirebaseStorage.instance.ref().child('user_photo').child(from).getDownloadURL();
     setState(() {
       postImage.add(url);
     });
@@ -151,47 +147,55 @@ class _inbox_page extends State<inbox_page> {
                                     margin: EdgeInsets.only(bottom: 5),
                                     padding: EdgeInsets.only(
                                         top: 5, bottom: 5, left: 5, right: 5),
-                                    height: 120,
+                                    height: 90,
                                     color: noti[index].data['checked'] ? Color(0xfff1f1f1) : Color(0xffffe3e3),
                                     child: Row(
                                       children: <Widget>[
                                         Container(
-                                          width: 120 * 4 / 3,
-                                          child: postImage.length < index + 1
-                                              ? Image.asset('assets/icons/logo.png')
-                                              : Image.network(
-                                                  postImage[index],
-                                                  fit: BoxFit.fitWidth,
-                                                ),
+                                          width: 80,
+                                          decoration: BoxDecoration(
+                                            color: Colors.black,
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(image: postImage.length < index+1 ? AssetImage('assets/icons/logo.png'):NetworkImage(postImage[index]),fit: BoxFit.cover)
+                                          ),
                                         ),
                                         SizedBox(
                                           width: 15,
                                         ),
                                         Expanded(
                                           child: Container(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.end,
+                                              child: Stack(
+                                                alignment: Alignment.bottomRight,
                                                 children: <Widget>[
-                                                  Expanded(
-                                                    flex: 2,
-                                                    child: Container(
-                                                      alignment: Alignment.topLeft,
-                                                      child: Text(noti.length < index+1 ? '' : noti[index].data['title'],style: profileText),
+                                                    Container(
+                                                      alignment: Alignment.center,
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: <Widget>[
+                                                          Expanded(
+                                                            flex: 2,
+                                                            child: Container(
+                                                              alignment: Alignment.topLeft,
+                                                              child: Text(noti.length < index+1 ? '' : noti[index].data['title'],style: profileText),
+                                                            ),
+                                                          ),
+                                                          Expanded(
+                                                            flex: 2,
+                                                            child: Container(
+                                                              alignment: Alignment.topLeft,
+                                                              child: Text(noti.length < index+1 ? '' : noti[index].data['body'],style: profileText,),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                  Expanded(
-                                                    flex: 3,
-                                                    child: Container(
-                                                      alignment: Alignment.topLeft,
-                                                      child: Text(noti.length < index+1 ? '' : noti[index].data['body'],style: bodyText,),
-                                                    ),
-                                                  ),
                                                   Container(
                                                     width: 80,
+                                                    height: 20,
                                                     alignment: Alignment.center,
                                                     decoration: BoxDecoration(
-                                                      color: Color(0xffc0c0c0),
-                                                      borderRadius: BorderRadius.all(Radius.circular(6))
+                                                        color: Color(0xffc0c0c0),
+                                                        borderRadius: BorderRadius.all(Radius.circular(6))
                                                     ),
                                                     child: Text(DateFormat('yyyy-MM-dd').format(noti[index].data['date'].toDate()).toString(),style: bodyText,),
                                                   ),

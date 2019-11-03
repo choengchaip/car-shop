@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'DealerDetail.dart';
+import 'package:http/http.dart' as http;
 
 class post_detail extends StatefulWidget {
   DocumentSnapshot queryData;
@@ -250,19 +251,13 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
     List<DocumentSnapshot> ldetail = List<DocumentSnapshot>();
     List<String> limg = List<String>();
     var lsetImg = {};
-    await _db
-        .collection("headerComment")
-        .orderBy("date")
-        .where("post", isEqualTo: queryData.documentID)
-        .getDocuments()
-        .then((docs) {
+    await _db.collection("headerComment").orderBy("date").where("post", isEqualTo: queryData.documentID).getDocuments().then((docs) {
       hdata = docs.documents;
     });
 
     for (int i = 0; i < hdata.length; i++) {
       String tmp = await getProfileImage(hdata[i].data["uid"]);
-      DocumentSnapshot tmp2 =
-          await _db.collection("seller").document(hdata[i].data["uid"]).get();
+      DocumentSnapshot tmp2 = await _db.collection("seller").document(hdata[i].data["uid"]).get();
       himg.add(tmp);
       hdetail.add(tmp2);
     }
@@ -270,13 +265,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
     List<List<DocumentSnapshot>> detailData = List<List<DocumentSnapshot>>();
     List<List<DocumentSnapshot>> finalData = List<List<DocumentSnapshot>>();
     for (int i = 0; i < hdata.length; i++) {
-      await _db
-          .collection("subComment")
-          .orderBy("date")
-          .where("headerID", isEqualTo: hdata[i].documentID)
-          .where("post", isEqualTo: queryData.documentID)
-          .getDocuments()
-          .then((docs) {
+      await _db.collection("subComment").orderBy("date").where("headerID", isEqualTo: hdata[i].documentID).where("post", isEqualTo: queryData.documentID).getDocuments().then((docs) {
         finalData.add(docs.documents);
       });
     }
@@ -284,10 +273,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
     for (int i = 0; i < finalData.length; i++) {
       for (int j = 0; j < finalData[i].length; j++) {
         String tmp = await getProfileImage(finalData[i][j].data["uid"]);
-        DocumentSnapshot tmp2 = await _db
-            .collection("seller")
-            .document(finalData[i][j].data["uid"])
-            .get();
+        DocumentSnapshot tmp2 = await _db.collection("seller").document(finalData[i][j].data["uid"]).get();
         lsetImg[finalData[i][j]["uid"]] = tmp;
         ldetail.add(tmp2);
       }
@@ -309,9 +295,29 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
   }
 
   Future toComment(String headerId, String uid, String text) async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    List<String> targets = List<String>();
     setState(() {
       keyBoardExpand = false;
     });
+    await _db.collection('headerComment').document(headerId).get().then((data){
+      if(data.data['uid'] != user.uid){
+        if(!targets.contains(data.data['uid'])){
+          targets.add(data.data['uid']);
+        }
+      }
+    });
+    await _db.collection('subComment').where('headerID', isEqualTo: headerId).getDocuments().then((docs){
+      docs.documents.forEach((data){
+        if(data.data['uid'] != user.uid){
+          if(!targets.contains(data.data['uid'])){
+            targets.add(data.data['uid']);
+          }
+        }
+      });
+    });
+
+    updateNotificationComment(text, targets);
     await _db.collection("subComment").add({
       "date": new DateTime.now().toUtc(),
       "headerID": headerId,
@@ -321,9 +327,75 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
     });
   }
 
+  Future updateNotificationComment(String comment, List<String> uid) async{
+
+    String text = 'เข้ามา Comment ต่อจาก Comment ของคุณ';
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    Map<String, dynamic> jsonNotification = {};
+    String name;
+    List<String> tokens = List<String>();
+
+    await _db.collection('seller').document(user.uid).get().then((data){
+      name = data.data['firstname']+' ';
+      name += data.data['lastname'];
+    });
+
+    for(int i=0;i<uid.length;i++){
+      await _db.collection('accounts').document(uid[i]).get().then((data){
+        tokens.add(data.data['token']);
+      });
+    }
+    for(int i=0;i<uid.length;i++){
+      jsonNotification['body'] = '${name} : ${comment}';
+      jsonNotification['checked'] = false;
+      jsonNotification['date'] = DateTime.now().toUtc();
+      jsonNotification['from'] = user.uid;
+      jsonNotification['post'] = queryData.documentID;
+      jsonNotification['title'] = '${name} ${text}';
+      jsonNotification['uid'] = uid[i];
+      _db.collection('notifications').add(jsonNotification);
+      if(tokens[i] != null){
+        sendToDevice(tokens[i], jsonNotification['title'], jsonNotification['body']);
+      }
+    }
+  }
+
+  Future updateNotificationHeader(String comment,String token)async{
+    String text = 'เข้ามา Comment ในโพสของคุณ';
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    Map<String, dynamic> jsonNotification = {};
+    String name = '';
+    print(user.uid);
+    await _db.collection('seller').document(user.uid).get().then((data){
+      name = data.data['firstname']+' ';
+      name += data.data['lastname'];
+    });
+
+    jsonNotification['body'] = '${name} : ${comment}';
+    jsonNotification['checked'] = false;
+    jsonNotification['date'] = DateTime.now().toUtc();
+    jsonNotification['from'] = user.uid;
+    jsonNotification['post'] = queryData.documentID;
+    jsonNotification['title'] = '${name} ${text}';
+    jsonNotification['uid'] = queryData.data['uid'];
+
+    _db.collection('notifications').add(jsonNotification);
+    if(token != null){
+      sendToDevice(token,jsonNotification['title'],jsonNotification['body']);
+    }
+  }
+
+  Future sendToDevice(String token,String title,String body) async{
+    String notificationAddress = "https://asia-east2-singh-sa-project.cloudfunctions.net/singhMessaging?title=${title}&body=${body}&token=${token}";
+    http.get(notificationAddress).timeout(Duration(seconds: 7));
+  }
+
   Future toHeader(String text, String uid) async {
     setState(() {
       keyBoardExpand = false;
+    });
+    await _db.collection('accounts').document(queryData.data['uid']).get().then((data){
+      updateNotificationHeader(text,data.data['token']);
     });
     await _db.collection("headerComment").add({
       "date": new DateTime.now().toUtc(),
@@ -2114,9 +2186,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
                                   Container(
                                     child: Column(
                                       children: List.generate(
-                                          headerComment == null
-                                              ? 0
-                                              : headerComment.length, (index) {
+                                          headerComment == null ? 0 : headerComment.length, (index) {
                                         return Container(
                                           alignment: Alignment.center,
                                           color: Colors.white,
