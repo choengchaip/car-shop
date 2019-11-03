@@ -19,7 +19,10 @@ final db = Firestore.instance;
 bool IsHas = false;
 
 Future logInWithGoogle() async {
-  final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+
+  final GoogleSignInAccount googleUser = await _googleSignIn.signIn().catchError((err){
+    print(err);
+  });
   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
   final AuthCredential credential = GoogleAuthProvider.getCredential(
     accessToken: googleAuth.accessToken,
@@ -30,7 +33,7 @@ Future logInWithGoogle() async {
 
 Future loginWithFacebook() async {
   final facebookLogin = FacebookLogin();
-  final result = await facebookLogin.logIn(['email']);
+  final result = await facebookLogin.logIn(['email']).catchError((e){print(e);});
   final token = result.accessToken.token;
   final graphResponse = await http.get(
       'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${token}');
@@ -98,7 +101,6 @@ class _login_page extends State<login_page> with TickerProviderStateMixin {
 
   Future check() async {
     final FirebaseUser user = await _auth.currentUser();
-    print("current user => ${user}");
     if (user == null) {
       await _googleSignIn.signOut();
     }else{
@@ -132,8 +134,7 @@ class _login_page extends State<login_page> with TickerProviderStateMixin {
   Future checkUser() async {
     final FirebaseUser user = await FirebaseAuth.instance.currentUser();
     var id = user.uid;
-    DocumentSnapshot snapshot =
-        await db.collection("accounts").document(id).get();
+    DocumentSnapshot snapshot = await db.collection("accounts").document(id).get();
     setState(() {
       if (snapshot.data == null) {
         IsHas = false;

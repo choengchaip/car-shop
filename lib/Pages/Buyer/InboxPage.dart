@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'PostDetail.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class inbox_page extends StatefulWidget {
   _inbox_page createState() => _inbox_page();
@@ -96,7 +97,7 @@ class _inbox_page extends State<inbox_page> {
                 ),
               ),
               Expanded(
-                  child: _data.length == 0 ? Container(
+                  child: noti.length == 0 ? Container(
                           alignment: Alignment.center,
                           child: Container(
                             child: Column(

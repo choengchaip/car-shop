@@ -343,6 +343,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
     for(int i=0;i<uid.length;i++){
       await _db.collection('accounts').document(uid[i]).get().then((data){
         tokens.add(data.data['token']);
+        print(tokens);
       });
     }
     for(int i=0;i<uid.length;i++){
@@ -2818,7 +2819,7 @@ class _post_detail extends State<post_detail> with TickerProviderStateMixin {
                                           child: Column(children: <Widget>[
                                             InkWell(
                                               onTap: () async {
-
+                                                print(dealerData.data['phone']);
                                               },
                                               child: Container(
                                                   alignment: Alignment.center,

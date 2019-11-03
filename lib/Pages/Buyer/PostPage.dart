@@ -150,6 +150,14 @@ class _post_page extends State<post_page> with TickerProviderStateMixin{
         });
       });
 
+      await _db.collection("age_clicks").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
+        docs.documents.forEach((data){
+          _db.runTransaction((Transaction myTran) async {
+            await myTran.delete(data.reference);
+          });
+        });
+      });
+
       await _db.collection("clicks").where("post", isEqualTo: postData.documentID).getDocuments().then((docs){
         docs.documents.forEach((data){
           _db.runTransaction((Transaction myTran) async {

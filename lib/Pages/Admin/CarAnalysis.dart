@@ -361,7 +361,7 @@ class _car_anal extends State<car_anal> with TickerProviderStateMixin {
                           children: <Widget>[
                             Container(
                               child: Text(
-                                yearData == null ? '' : colorsData['brand'],
+                                yearData == null ? '' : yearData['brand'].toString(),
                                 style: analText,
                               ),
                             ),
