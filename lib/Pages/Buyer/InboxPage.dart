@@ -155,7 +155,6 @@ class _inbox_page extends State<inbox_page> {
                                         Container(
                                           width: 80,
                                           decoration: BoxDecoration(
-                                            color: Colors.black,
                                             shape: BoxShape.circle,
                                             image: DecorationImage(image: postImage.length < index+1 ? AssetImage('assets/icons/logo.png'):NetworkImage(postImage[index]),fit: BoxFit.cover)
                                           ),
