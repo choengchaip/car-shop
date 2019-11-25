@@ -137,7 +137,7 @@ class _contact_page extends State<contact_page> {
   @override
   Widget build(BuildContext context) {
     LocationData currentLocation;
-    Future<LocationData> getLocation() async{
+    Future<LocationData> getLocation() async {
       Location location = Location();
       try {
         return await location.getLocation();
@@ -152,11 +152,13 @@ class _contact_page extends State<contact_page> {
     Future uploadData() async {
       final FirebaseUser user = await _auth.currentUser();
       bool isHas = false;
-      await _db.collection('buyer').document(user.uid).get().then((data){
-        isHas = true;
+      await _db.collection('buyer').document(user.uid).get().then((data) {
+        if (data == null) {
+          isHas = true;
+        }
       });
       var data;
-      if(isHas){
+      if (isHas) {
         data = {
           "firstName": _firstname.text,
           "lastName": _lastname.text,
@@ -164,10 +166,10 @@ class _contact_page extends State<contact_page> {
           "phone": _mobile.text,
           "passpord": _passpord.text,
           "about": _about.text,
-          "lat" : latPoint,
-          "long" : lonPoint,
+          "lat": latPoint,
+          "long": lonPoint,
         };
-      }else{
+      } else {
         data = {
           "firstName": _firstname.text,
           "lastName": _lastname.text,
@@ -175,8 +177,8 @@ class _contact_page extends State<contact_page> {
           "phone": _mobile.text,
           "passpord": _passpord.text,
           "about": _about.text,
-          "lat" : latPoint,
-          "long" : lonPoint,
+          "lat": latPoint,
+          "long": lonPoint,
           "clicks": 0
         };
       }
@@ -556,11 +558,18 @@ class _contact_page extends State<contact_page> {
                           child: Column(
                             children: <Widget>[
                               GestureDetector(
-                                onTap: ()async{
-                                  final GoogleMapController current = await _controller.future;
+                                onTap: () async {
+                                  final GoogleMapController current =
+                                      await _controller.future;
                                   currentLocation = await getLocation();
-                                  current.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(currentLocation.latitude, currentLocation.longitude),zoom: 16)));
-                                  setState((){
+                                  current.animateCamera(
+                                      CameraUpdate.newCameraPosition(
+                                          CameraPosition(
+                                              target: LatLng(
+                                                  currentLocation.latitude,
+                                                  currentLocation.longitude),
+                                              zoom: 16)));
+                                  setState(() {
                                     latPoint = currentLocation.latitude;
                                     lonPoint = currentLocation.longitude;
                                   });
@@ -571,7 +580,8 @@ class _contact_page extends State<contact_page> {
                                   height: 60,
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(100)),
                                   ),
                                   child: Icon(Icons.location_on),
                                 ),

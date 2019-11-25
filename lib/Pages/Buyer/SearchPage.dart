@@ -29,6 +29,10 @@ class _search_page extends State<search_page> {
   TextStyle topBrandText =
       TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold);
 
+  double _minPrice = 100000;
+  double _maxPrice = 100000;
+  bool _minCheck = false;
+  bool _maxCheck = false;
   final _db = Firestore.instance;
 
   Query _query;
@@ -40,15 +44,19 @@ class _search_page extends State<search_page> {
       modelData = List<DocumentSnapshot>();
       data["model"] = "Select car model";
     });
-    _db.collection('post').where('band',isEqualTo: queryData['band']).getDocuments().then((docs){
-      docs.documents.forEach((data){
+    _db
+        .collection('post')
+        .where('band', isEqualTo: queryData['band'])
+        .getDocuments()
+        .then((docs) {
+      docs.documents.forEach((data) {
         bool isHas = false;
-        for(int i=0;i<modelData.length;i++){
-          if(data.data['model'] == modelData[i].data['model']){
+        for (int i = 0; i < modelData.length; i++) {
+          if (data.data['model'] == modelData[i].data['model']) {
             isHas = true;
           }
         }
-        if(!isHas){
+        if (!isHas) {
           modelData.add(data);
         }
       });
@@ -57,9 +65,9 @@ class _search_page extends State<search_page> {
 
   Future getRegionModel() async {
     List<String> tmpData = [];
-    _db.collection("post").snapshots().listen((docs){
-      docs.documents.forEach((data){
-        if(!tmpData.contains(data.data["location"])){
+    _db.collection("post").snapshots().listen((docs) {
+      docs.documents.forEach((data) {
+        if (!tmpData.contains(data.data["location"])) {
           tmpData.add(data.data["location"]);
         }
       });
@@ -68,6 +76,7 @@ class _search_page extends State<search_page> {
       });
     });
   }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -151,16 +160,23 @@ class _search_page extends State<search_page> {
   @override
   Widget build(BuildContext context) {
     double _height = MediaQuery.of(context).size.height;
-    _showDialog(){
-      showDialog(context: context,builder: (context){
-        return AlertDialog(
-          title: Text("Select car brand first"),
-          actions: <Widget>[
-            FlatButton(onPressed: (){Navigator.of(context).pop();}, child: Text("ตกลง"))
-          ],
-        );
-      });
+    _showDialog() {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Select car brand first"),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("ตกลง"))
+              ],
+            );
+          });
     }
+
     return Scaffold(
       body: Container(
         color: Color(0xffff4141),
@@ -306,9 +322,9 @@ class _search_page extends State<search_page> {
                                 InkWell(
                                   onTap: () {
                                     setState(() {
-                                      if(modelData == null){
-                                      _showDialog();
-                                      }else{
+                                      if (modelData == null) {
+                                        _showDialog();
+                                      } else {
                                         carModelExpand = true;
                                       }
                                     });
@@ -353,13 +369,14 @@ class _search_page extends State<search_page> {
                                   height: 10,
                                 ),
                                 InkWell(
-                                  onTap: (){
+                                  onTap: () {
                                     setState(() {
                                       carRegionExpand = true;
                                     });
                                   },
                                   child: Container(
-                                    padding: EdgeInsets.only(left: 10, right: 10),
+                                    padding:
+                                        EdgeInsets.only(left: 10, right: 10),
                                     height: 45,
                                     color: Colors.white,
                                     child: Row(
@@ -368,7 +385,8 @@ class _search_page extends State<search_page> {
                                       children: <Widget>[
                                         Text(
                                           data["location"],
-                                          style: data["location"] == "Select region"
+                                          style: data["location"] ==
+                                                  "Select region"
                                               ? subText
                                               : superText,
                                         ),
@@ -381,6 +399,99 @@ class _search_page extends State<search_page> {
                                     ),
                                   ),
                                 ),
+                                Container(
+                                  alignment: Alignment.bottomLeft,
+                                  height: 30,
+                                  child: Text(
+                                    "Price",
+                                    style: headerText,
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 15),
+                                  height: 30,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        child: Text("Search By Min :  "),
+                                      ),
+                                      Container(
+                                        height: 30,
+                                        width: 60,
+                                        child: Switch(
+                                          value: _minCheck,
+                                          onChanged: (bool value){
+                                            setState(() {
+                                              _minCheck = value;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(left: 15),
+                                  height: 30,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Container(
+                                        child: Text("Search By Max : "),
+                                      ),
+                                      Container(
+                                        height: 30,
+                                        width: 60,
+                                        child: Switch(
+                                          value: _maxCheck,
+                                          onChanged: (bool value){
+                                            setState(() {
+                                              _maxCheck = value;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                _minCheck ? Container(
+                                  alignment: Alignment.bottomLeft,
+                                  padding: EdgeInsets.only(left: 15),
+                                  height: 30,
+                                  child: Text(
+                                    "Min : ${_minPrice.toStringAsFixed(0)}",
+                                    style: subText,
+                                  ),
+                                ):Container(),
+                                _minCheck ? Slider(
+                                  value: _minPrice,
+                                  min: 100000,
+                                  max: 10000000,
+                                  onChanged: (double value) {
+                                    setState(() {
+                                      _minPrice = value;
+                                    });
+                                  },
+                                  label: 1.toString(),
+                                ):Container(),
+                                _maxCheck ? Container(
+                                  alignment: Alignment.bottomLeft,
+                                  padding: EdgeInsets.only(left: 15),
+                                  height: 30,
+                                  child: Text(
+                                    "Max : ${_maxPrice.toStringAsFixed(0)}",
+                                    style: subText,
+                                  ),
+                                ):Container(),
+                                _maxCheck ? Slider(
+                                  min: 100000,
+                                  max: 10000000,
+                                  value: _maxPrice,
+                                  onChanged: (double value) {
+                                    setState(() {
+                                      _maxPrice = value;
+                                    });
+                                  },
+                                ):Container(),
                                 Container(
                                   padding: EdgeInsets.only(left: 10, right: 10),
                                   height: 45,
@@ -1268,13 +1379,19 @@ class _search_page extends State<search_page> {
                                   child: Container(
                                     child: ListView(
                                       children: List.generate(
-                                        modelData == null ? 0 : modelData.length, (index) {
+                                        modelData == null
+                                            ? 0
+                                            : modelData.length,
+                                        (index) {
                                           return InkWell(
                                             onTap: () {
                                               setState(() {
                                                 carModelExpand = false;
-                                                data["model"] = modelData[index].data["model"];
-                                                queryData["model"] = modelData[index].data["model"];
+                                                data["model"] = modelData[index]
+                                                    .data["model"];
+                                                queryData["model"] =
+                                                    modelData[index]
+                                                        .data["model"];
                                               });
                                             },
                                             child: Card(
@@ -1283,8 +1400,11 @@ class _search_page extends State<search_page> {
                                                   ["color"]),
                                               child: Container(
                                                 alignment: Alignment.center,
-                                                child: Text(modelData == null ? "Loading ..."
-                                                      : modelData[index].data["model"],
+                                                child: Text(
+                                                  modelData == null
+                                                      ? "Loading ..."
+                                                      : modelData[index]
+                                                          .data["model"],
                                                   style: blackText,
                                                 ),
                                                 height: 40,
@@ -1380,35 +1500,42 @@ class _search_page extends State<search_page> {
                                   child: Container(
                                     child: ListView(
                                       children: List.generate(
-                                        regionData == null ? 0 : regionData.length, (index) {
-                                        return InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              carRegionExpand = false;
-                                              data["location"] = regionData[index];
-                                              queryData["location"] = regionData[index];
-                                            });
-                                          },
-                                          child: Card(
-                                            color: Color(selectColors[(index %
-                                                selectColors.length)]
-                                            ["color"]),
-                                            child: Container(
-                                              alignment: Alignment.center,
-                                              child: Text(regionData == null ? "Loading ..."
-                                                  : regionData[index],
-                                                style: blackText,
+                                        regionData == null
+                                            ? 0
+                                            : regionData.length,
+                                        (index) {
+                                          return InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                carRegionExpand = false;
+                                                data["location"] =
+                                                    regionData[index];
+                                                queryData["location"] =
+                                                    regionData[index];
+                                              });
+                                            },
+                                            child: Card(
+                                              color: Color(selectColors[(index %
+                                                      selectColors.length)]
+                                                  ["color"]),
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  regionData == null
+                                                      ? "Loading ..."
+                                                      : regionData[index],
+                                                  style: blackText,
+                                                ),
+                                                height: 40,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                8))),
                                               ),
-                                              height: 40,
-                                              decoration: BoxDecoration(
-                                                  borderRadius:
-                                                  BorderRadius.all(
-                                                      Radius.circular(
-                                                          8))),
                                             ),
-                                          ),
-                                        );
-                                      },
+                                          );
+                                        },
                                       ),
                                     ),
                                   ),

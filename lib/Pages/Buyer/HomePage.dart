@@ -151,6 +151,7 @@ class _home_page extends State<home_page> with TickerProviderStateMixin{
     await _db.collection("buyer").orderBy("clicks",descending: true).getDocuments().then((docs) {
       setState(() {
         queryDealerData = docs.documents;
+        print(queryDealerData);
       });
     });
     final StorageReference storageReference =

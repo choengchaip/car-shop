@@ -11,8 +11,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:sa_project/Pages/Buyer/PostDetail.dart';
-
 import 'MainPage.dart';
+import 'package:sa_project/LoadingProgress.dart';
 
 class home_page extends StatefulWidget {
   _home_page createState() => _home_page();
@@ -21,7 +21,7 @@ class home_page extends StatefulWidget {
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final _db = Firestore.instance;
 
-class _home_page extends State<home_page> {
+class _home_page extends State<home_page> with TickerProviderStateMixin{
   TextStyle detailText = TextStyle(
       color: Color(0xff434343), fontSize: 16, fontWeight: FontWeight.bold);
 
@@ -40,7 +40,9 @@ class _home_page extends State<home_page> {
   TextStyle contactText = TextStyle(
       color: Color(0xffff4141), fontSize: 16, fontWeight: FontWeight.bold);
   List<DocumentSnapshot> postData;
-
+  bool isLoad = false;
+  LoadingProgress _loadingProgress;
+  AnimationController _animationController;
   var colors = [
     {"name": "All", "color": 0xff},
     {"name": "White", "color": 0xffffffff},
@@ -81,9 +83,11 @@ class _home_page extends State<home_page> {
 
   Future getUserData() async {
     FirebaseUser user = await _auth.currentUser();
-    setState(() {
-      displayName = user.displayName;
-      carData["uid"] = user.uid;
+    _db.collection('buyer').document(user.uid).get().then((data){
+      setState(() {
+        displayName = data.data['passpord'];
+        carData["uid"] = user.uid;
+      });
     });
   }
 
@@ -167,8 +171,9 @@ class _home_page extends State<home_page> {
   }
 
   Future getCarData() async {
+    print("Loading Dat ..");
     final FirebaseUser user = await _auth.currentUser();
-    _db
+    await _db
         .collection("post")
         .where("uid", isEqualTo: user.uid)
         .getDocuments()
@@ -207,6 +212,9 @@ class _home_page extends State<home_page> {
 
   @override
   void initState() {
+    isLoad = false;
+    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 10));
+    _loadingProgress = LoadingProgress(_animationController);
     // TODO: implement initState
     super.initState();
     getUserData();
@@ -214,6 +222,14 @@ class _home_page extends State<home_page> {
     getCarData();
   }
 
+  @override
+  void dispose(){
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  String reasonText = "อื่นๆ";
+  List<String> reasonList = ["ต้องการหาทุนไปซื้อรถใหม่","อื่นๆ","ไม่ได้ใช้แล้ว"];
   Map<String, dynamic> carData = {"uid": ""};
 
   @override
@@ -225,7 +241,17 @@ class _home_page extends State<home_page> {
 
     uploadContent() async {
       setState(() {
+        isLoad = true;
+        _loadingProgress.setProgress(50.0);
+        _loadingProgress.setProgressText("Start Uploading Data ...");
+      });
+      setState(() {
         carData["date"] = new DateTime.now().toUtc();
+        carData["reason"] = reasonText;
+      });
+      setState(() {
+        _loadingProgress.setProgress(100.0);
+        _loadingProgress.setProgressText("Uploading Data ...");
       });
       final DocumentReference ref = await _db.collection("post").add(carData);
       print(ref.documentID);
@@ -234,7 +260,15 @@ class _home_page extends State<home_page> {
           .document(ref.documentID)
           .updateData({"size": images.length});
 
+      setState(() {
+        _loadingProgress.setProgress(150.0);
+        _loadingProgress.setProgressText("Uploading Images ...");
+      });
       for (int i = 0; i < images.length; i++) {
+        setState(() {
+          _loadingProgress.setProgress(150.0);
+          _loadingProgress.setProgressText("Uploading Images ${i+1}/${images.length}");
+        });
         StorageReference storageReference = FirebaseStorage.instance
             .ref()
             .child("post_photo")
@@ -243,7 +277,16 @@ class _home_page extends State<home_page> {
         StorageUploadTask storageUploadTask = storageReference.putFile(images[i]);
         await (await storageUploadTask.onComplete).ref.getDownloadURL();
       }
+      setState(() {
+        _loadingProgress.setProgress(200.0);
+        _loadingProgress.setProgressText("Adding post to Data");
+      });
       await _db.collection("clicks").add({"clicks": 0, "post": ref.documentID});
+      setState(() {
+        isLoad = false;
+      });
+      Navigator.of(context).pop();
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => main_page()));
     }
 
     void _showDialog(String body) {
@@ -286,7 +329,7 @@ class _home_page extends State<home_page> {
       );
     };
 
-    Future<bool> checkData() async {
+    Future checkData() async {
       if (!p1) {
         _showDialog("กรุณาเพิ่มรูปภาพ");
         return false;
@@ -321,12 +364,8 @@ class _home_page extends State<home_page> {
       }
 
       if (progress == 8) {
-        loadingPopup();
-        await uploadContent().then((e) {
-          return true;
-        });
+        await uploadContent();
       }
-      return false;
     }
 
     int k = (progress) + 1;
@@ -634,12 +673,21 @@ class _home_page extends State<home_page> {
                                   flex: 1,
                                   child: Container(
                                     alignment: Alignment.centerLeft,
-                                    child: TextField(
-                                      controller: refNumber,
-                                      decoration: InputDecoration.collapsed(
-                                          hintText:
-                                              "Any number to identify the vehicle"),
-                                      style: subText,
+                                    child: DropdownButton<String>(
+                                      value: reasonText,
+                                      icon: Icon(Icons.arrow_downward),
+                                      iconSize: 16,
+                                      onChanged: (String newValue){
+                                        setState(() {
+                                          reasonText = newValue;
+                                        });
+                                      },
+                                      items: reasonList.map<DropdownMenuItem<String>>((String value){
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList()
                                     ),
                                   ),
                                 ),
@@ -669,7 +717,10 @@ class _home_page extends State<home_page> {
               _scrollController.nextPage(
                   duration: Duration(milliseconds: 500),
                   curve: Curves.easeInOut);
-              carData.addAll({"plateNumber": plateNumber.text});
+              setState((){
+                carData.addAll({"plateNumber": plateNumber.text});
+              });
+
             },
             child: Container(
               height: 65,
@@ -1494,6 +1545,7 @@ class _home_page extends State<home_page> {
                           },
                         ),
                       );
+                      getUserData();
                       if (data != null) {
                         if (!p8) {
                           p8 = true;
@@ -1572,15 +1624,8 @@ class _home_page extends State<home_page> {
             ),
           ),
           InkWell(
-            onTap: () async {
-              bool com = await checkData();
-              if (com) {
-                await getCarData().then((e) {
-                  Navigator.of(context).pop();
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => main_page()));
-                });
-              }
+            onTap: (){
+              checkData();
             },
             child: Container(
               height: 65,
@@ -1969,7 +2014,7 @@ class _home_page extends State<home_page> {
     );
 
     // TODO: implement build
-    return Container(
+    return isLoad ? _loadingProgress.getSubWidget(context) : Container(
       color: Color(0xffff4141),
       child: SafeArea(
         child: LayoutBuilder(
