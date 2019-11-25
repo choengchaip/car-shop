@@ -420,7 +420,7 @@ class _search_page extends State<search_page> {
                                         width: 60,
                                         child: Switch(
                                           value: _minCheck,
-                                          onChanged: (bool value){
+                                          onChanged: (bool value) {
                                             setState(() {
                                               _minCheck = value;
                                             });
@@ -443,7 +443,7 @@ class _search_page extends State<search_page> {
                                         width: 60,
                                         child: Switch(
                                           value: _maxCheck,
-                                          onChanged: (bool value){
+                                          onChanged: (bool value) {
                                             setState(() {
                                               _maxCheck = value;
                                             });
@@ -453,45 +453,53 @@ class _search_page extends State<search_page> {
                                     ],
                                   ),
                                 ),
-                                _minCheck ? Container(
-                                  alignment: Alignment.bottomLeft,
-                                  padding: EdgeInsets.only(left: 15),
-                                  height: 30,
-                                  child: Text(
-                                    "Min : ${_minPrice.toStringAsFixed(0)}",
-                                    style: subText,
-                                  ),
-                                ):Container(),
-                                _minCheck ? Slider(
-                                  value: _minPrice,
-                                  min: 100000,
-                                  max: 10000000,
-                                  onChanged: (double value) {
-                                    setState(() {
-                                      _minPrice = value;
-                                    });
-                                  },
-                                  label: 1.toString(),
-                                ):Container(),
-                                _maxCheck ? Container(
-                                  alignment: Alignment.bottomLeft,
-                                  padding: EdgeInsets.only(left: 15),
-                                  height: 30,
-                                  child: Text(
-                                    "Max : ${_maxPrice.toStringAsFixed(0)}",
-                                    style: subText,
-                                  ),
-                                ):Container(),
-                                _maxCheck ? Slider(
-                                  min: 100000,
-                                  max: 10000000,
-                                  value: _maxPrice,
-                                  onChanged: (double value) {
-                                    setState(() {
-                                      _maxPrice = value;
-                                    });
-                                  },
-                                ):Container(),
+                                _minCheck
+                                    ? Container(
+                                        alignment: Alignment.bottomLeft,
+                                        padding: EdgeInsets.only(left: 15),
+                                        height: 30,
+                                        child: Text(
+                                          "Min : ${_minPrice.toStringAsFixed(0)}",
+                                          style: subText,
+                                        ),
+                                      )
+                                    : Container(),
+                                _minCheck
+                                    ? Slider(
+                                        value: _minPrice,
+                                        min: 100000,
+                                        max: 10000000,
+                                        onChanged: (double value) {
+                                          setState(() {
+                                            _minPrice = value;
+                                          });
+                                        },
+                                        label: 1.toString(),
+                                      )
+                                    : Container(),
+                                _maxCheck
+                                    ? Container(
+                                        alignment: Alignment.bottomLeft,
+                                        padding: EdgeInsets.only(left: 15),
+                                        height: 30,
+                                        child: Text(
+                                          "Max : ${_maxPrice.toStringAsFixed(0)}",
+                                          style: subText,
+                                        ),
+                                      )
+                                    : Container(),
+                                _maxCheck
+                                    ? Slider(
+                                        min: 100000,
+                                        max: 10000000,
+                                        value: _maxPrice,
+                                        onChanged: (double value) {
+                                          setState(() {
+                                            _maxPrice = value;
+                                          });
+                                        },
+                                      )
+                                    : Container(),
                                 Container(
                                   padding: EdgeInsets.only(left: 10, right: 10),
                                   height: 45,
@@ -1276,6 +1284,7 @@ class _search_page extends State<search_page> {
                                                 brandData[index].data["brand"];
                                             queryData["band"] =
                                                 brandData[index].data["brand"];
+                                            getModel();
                                           });
                                         },
                                         child: Card(
